@@ -21,11 +21,9 @@ getPassword user search = do
   checkLastPassIsInstalled
   loggedIn <- isLoggedIn
   unless loggedIn (attemptLogin user)
-  results <- getMatchingPasswords search
-  case results of
-    [] -> throwError PasswordNotFound
-    [entry] -> showPassword (Entry.id entry)
-    _ -> throwError (MultiplePasswordsFound results)
+  entries <- getMatchingPasswords search
+  entryId <- getEntryId entries
+  showPassword entryId
 
 checkLastPassIsInstalled :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
 checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled
@@ -44,6 +42,11 @@ getMatchingPasswords search = filter (Entry.matches search) <$> listPasswords
 
 listPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => m [Entry]
 listPasswords = wrapError LastPass.listPasswords
+
+getEntryId :: MonadError GetPasswordError m => [Entry] -> m EntryID
+getEntryId [] = throwError PasswordNotFound
+getEntryId [entry] = return (Entry.id entry)
+getEntryId entries = throwError (MultiplePasswordsFound entries)
 
 showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => EntryID -> m Password
 showPassword = wrapError . LastPass.showPassword
