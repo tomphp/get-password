@@ -10,6 +10,7 @@ where
 
 import ConfigLoader.Class (LoadConfigError (LoadConfigError), MonadConfigLoader (loadConfig))
 import ConfigLoader.Config (Config (..), defaultConfig)
+import Console.Class (MonadConsole)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans, lift)
 import qualified Data.Bifunctor as Bifunctor
@@ -23,7 +24,7 @@ import System.FilePath ((</>))
 
 newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
   deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO, MonadPrinter)
+  deriving newtype (Applicative, Monad, MonadIO, MonadPrinter, MonadConsole)
 
 instance MonadTrans MacLoaderT where
   lift = MacLoaderT

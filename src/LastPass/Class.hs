@@ -25,7 +25,7 @@ class Monad m => MonadLastPass m where
   listPasswords :: m (LastPassResult [Entry])
   showPassword :: EntryID -> m (LastPassResult Password)
 
-instance (MonadLastPass m, Monad m) => MonadLastPass (ExceptT e m) where
+instance MonadLastPass m => MonadLastPass (ExceptT e m) where
   checkIsInstalled = lift checkIsInstalled
   isLoggedIn = lift isLoggedIn
   login = lift . login
