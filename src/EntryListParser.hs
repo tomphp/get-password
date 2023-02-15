@@ -10,16 +10,25 @@ import Text.Megaparsec.Char (char, digitChar, eol, spaceChar)
 import Text.Megaparsec.Error (errorBundlePretty)
 
 parseEntryList :: Text -> Either String [PasswordEntry]
-parseEntryList = first errorBundlePretty . parse parseEntries ""
+parseEntryList = first errorBundlePretty . parse entries ""
 
-parseEntries :: Parsec Void Text [PasswordEntry]
-parseEntries = many parseEntry
+entries :: Parsec Void Text [PasswordEntry]
+entries = many entry
 
-parseEntry :: Parsec Void Text PasswordEntry
-parseEntry = do
-  entryId <- pack <$> some digitChar <?> "Entry ID"
+entry :: Parsec Void Text PasswordEntry
+entry = do
+  entryId <- entryId_
   void spaceChar
-  name <- pack <$> between (char '"') (char '"' <?> "closing double quote") (try $ many (noneOf ['"'])) <?> "Name"
+  name <- entryName
   void spaceChar
-  url <- pack <$> manyTill anySingle (void eol <|> eof) <?> "URL"
+  url <- entryUrl
   return PasswordEntry {..}
+
+entryId_ :: Parsec Void Text Text
+entryId_ = pack <$> some digitChar <?> "Entry ID"
+
+entryName :: Parsec Void Text Text
+entryName = pack <$> between (char '"') (char '"' <?> "closing double quote") (try $ many (noneOf ['"'])) <?> "Name"
+
+entryUrl :: Parsec Void Text Text
+entryUrl = pack <$> manyTill anySingle (void eol <|> eof) <?> "URL"
