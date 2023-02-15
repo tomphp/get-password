@@ -1,8 +1,10 @@
 module PasswordEntry (PasswordEntry (..)) where
 
+import Data.Text (Text)
+
 data PasswordEntry = PasswordEntry
-  { entryId :: !String,
-    name :: !String,
-    url :: !String
+  { entryId :: !Text,
+    name :: !Text,
+    url :: !Text
   }
   deriving (Show, Eq)

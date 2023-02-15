@@ -1,12 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module LastPass (MonadLastPass (..), LassPassT (..), LastPassError (..)) where
 
 import Control.Monad.Error.Class (MonadError (catchError, throwError), liftEither)
 import Control.Monad.Except (ExceptT, void)
 import Control.Monad.Trans (MonadTrans (lift))
 import Data.Bifunctor (first)
-import Data.Text (pack, unpack)
+import Data.Text (Text, unpack)
 import EntryListParser (parseEntryList)
 import GHC.IO.Exception (ExitCode (ExitSuccess))
 import PasswordEntry (PasswordEntry)
@@ -26,18 +24,18 @@ class (MonadError LastPassError m, Monad m) => MonadLastPass m where
   checkIsInstalled :: m ()
   checkIsLoggedIn :: m ()
   listPasswords :: m [PasswordEntry]
-  showPassword :: String -> m String
+  showPassword :: Text -> m Text
 
-run :: FilePath -> [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) String
+run :: FilePath -> [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) Text
 run cmd args err = do
   (exitCode, output, _) <-
     lift $
       lift $ readProcessWithExitCode cmd args ""
   case exitCode of
-    ExitSuccess -> return $ unpack output
+    ExitSuccess -> return output
     _ -> liftEither (Left err)
 
-lpass :: [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) String
+lpass :: [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) Text
 lpass = run "lpass"
 
 instance MonadLastPass (LassPassT (ExceptT LastPassError IO)) where
@@ -49,11 +47,10 @@ instance MonadLastPass (LassPassT (ExceptT LastPassError IO)) where
 
   listPasswords = do
     output <- lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] LastPassListPasswordsFailed
-    liftEither $ first LastPassListPasswordsParseFailed (parseEntryList $ pack output)
+    liftEither $ first LastPassListPasswordsParseFailed (parseEntryList output)
 
-  showPassword :: String -> (LassPassT (ExceptT LastPassError IO)) String
   showPassword entryId =
-    run "lpass" ["show", "--password", entryId] (LastPassShowPasswordFailed "fixme")
+    run "lpass" ["show", "--password", unpack entryId] (LastPassShowPasswordFailed "fixme")
 
 newtype LassPassT m a = LassPassT {runLastPassT :: m a}
   deriving (Functor, Applicative, Monad)

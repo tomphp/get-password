@@ -11,16 +11,17 @@ import Control.Monad.Except (ExceptT, MonadError, liftEither, runExceptT)
 import Control.Monad.RWS (MonadState, RWS, runRWS)
 import Control.Monad.State (get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
+import Data.Text (Text)
 import LastPass (LastPassError, MonadLastPass (..))
 import PasswordEntry (PasswordEntry (PasswordEntry))
 
-type Command = String
+type Command = Text
 
 data Results = Results
   { checkIsInstalledResult :: Either LastPassError (),
     checkIsLoggedInResult :: Either LastPassError (),
     listPasswordsResult :: Either LastPassError [PasswordEntry],
-    showPasswordResult :: Either LastPassError String
+    showPasswordResult :: Either LastPassError Text
   }
 
 newtype MockLastPass a = MockLastPass
@@ -46,7 +47,7 @@ defaultResults =
       showPasswordResult = Right ""
     }
 
-mockResult :: String -> (Results -> Either LastPassError a) -> MockLastPass a
+mockResult :: Text -> (Results -> Either LastPassError a) -> MockLastPass a
 mockResult command getter = do
   tell [command]
   results <- get
@@ -77,7 +78,7 @@ listPasswordsWillReturn :: LastPassResult [PasswordEntry] -> MockLastPass ()
 listPasswordsWillReturn returnValue = do
   modify $ \state -> state {listPasswordsResult = returnValue}
 
-showPasswordWillReturn :: LastPassResult String -> MockLastPass ()
+showPasswordWillReturn :: LastPassResult Text -> MockLastPass ()
 showPasswordWillReturn returnValue = do
   modify $ \state -> state {showPasswordResult = returnValue}
 
