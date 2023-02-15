@@ -4,7 +4,8 @@ import Control.Monad (void)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Text (Text, isInfixOf)
 import LastPass (LastPassError (LastPassMultiplePasswordsFound, LastPassPasswordNotFound), MonadLastPass (..))
-import PasswordEntry (PasswordEntry (entryId, name, url))
+import PasswordEntry (PasswordEntry)
+import qualified PasswordEntry as Entry
 
 getPassword :: (MonadLastPass m, MonadError LastPassError m) => Text -> m Text
 getPassword search = do
@@ -15,8 +16,8 @@ getPassword search = do
 
   case results of
     [] -> throwError LastPassPasswordNotFound
-    [entry] -> showPassword (entryId entry)
+    [entry] -> showPassword (Entry.id entry)
     _ -> throwError (LastPassMultiplePasswordsFound results)
 
 matches :: Text -> PasswordEntry -> Bool
-matches search entry = search `isInfixOf` name entry || search `isInfixOf` url entry
+matches search entry = search `isInfixOf` Entry.name entry || search `isInfixOf` Entry.url entry
