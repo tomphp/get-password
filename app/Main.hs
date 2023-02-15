@@ -1,36 +1,31 @@
 module Main (main) where
 
+import qualified Args
 import ConfigLoader.Class (MonadConfigLoader (loadConfig))
 import ConfigLoader.Config (Config (Config, user))
 import ConfigLoader.MacLoader (MacLoaderT (runMacLoaderT))
+import Console.IOConsole (runIOConsole)
 import Control.Monad ((>=>))
 import Control.Monad.Except (runExceptT)
-import Control.Monad.IO.Class (MonadIO (liftIO))
-import qualified Data.Text as Text
+import Control.Monad.IO.Class (MonadIO)
 import GetPassword (GetPasswordError (..))
 import qualified GetPassword
 import LastPass.Class (MonadLastPass, Password, User)
 import qualified LastPass.CliLastPass as LastPass
-import LastPass.Entry (Search (Search))
-import Printer.Class (MonadPrinter (printError, printLoadConfigError, printPassword, printUsage))
+import LastPass.Entry (Search)
+import Printer.Class (MonadPrinter (printError, printLoadConfigError, printPassword))
 import Printer.SimplePrinter (runSimplePrinterT)
-import qualified System.Environment as Env
 
 main :: IO ()
-main = runSimplePrinterT $ runMacLoaderT $ LastPass.runCliLastPassT main'
+main = do
+  search <- runIOConsole Args.getArgs
+  runSimplePrinterT $ runMacLoaderT $ LastPass.runCliLastPassT $ main' search
 
-main' :: (MonadLastPass m, MonadConfigLoader m, MonadPrinter m, MonadIO m) => m ()
-main' = loadConfig >>= either printLoadConfigError runGetPassword
+main' :: (MonadLastPass m, MonadConfigLoader m, MonadPrinter m, MonadIO m) => Search -> m ()
+main' search = loadConfig >>= either printLoadConfigError (runGetPassword search)
 
-runGetPassword :: (MonadLastPass m, MonadPrinter m, MonadIO m) => Config -> m ()
-runGetPassword Config {user} = liftIO getArgs >>= maybe printUsage (getPasswordAndPrint user)
-
-getArgs :: MonadIO m => m (Maybe Search)
-getArgs = parseArgs <$> liftIO Env.getArgs
-
-parseArgs :: [String] -> Maybe Search
-parseArgs [search] = Just $ Search $ Text.pack search
-parseArgs _ = Nothing
+runGetPassword :: (MonadLastPass m, MonadPrinter m, MonadIO m) => Search -> Config -> m ()
+runGetPassword search Config {user} = getPasswordAndPrint user search
 
 getPasswordAndPrint :: (MonadLastPass m, MonadPrinter m, MonadIO m) => Maybe User -> Search -> m ()
 getPasswordAndPrint user = getPassword user >=> either printError printPassword
