@@ -1,6 +1,6 @@
-module Entry (Entry (..)) where
+module Entry (Entry (..), matches) where
 
-import Data.Text (Text)
+import Data.Text (Text, isInfixOf)
 
 data Entry = Entry
   { id :: !Text,
@@ -8,3 +8,6 @@ data Entry = Entry
     url :: !Text
   }
   deriving (Show, Eq)
+
+matches :: Text -> Entry -> Bool
+matches search entry = search `isInfixOf` Entry.name entry || search `isInfixOf` Entry.url entry
