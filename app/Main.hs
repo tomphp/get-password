@@ -1,23 +1,38 @@
 module Main where
 
+import Control.Monad ((>=>))
 import Control.Monad.Except (runExceptT)
+import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import qualified GetPassword
+import LastPass (LastPassError)
 import qualified LastPass
 import qualified System.Environment as Env
 
 main :: IO ()
-main = do
-  args <- Env.getArgs
-  case args of
-    [search] -> do
-      result <-
-        runExceptT $
-          LastPass.runLastPassT $
-            GetPassword.getPassword $
-              Text.pack search
-      case result of
-        Left err -> TextIO.putStrLn ("Error: " <> Text.pack (show err))
-        Right password -> TextIO.putStrLn password
-    _ -> TextIO.putStrLn "Usage: lastpass-hs <search>"
+main = getArgs >>= maybe printUsage runApp
+
+getArgs :: IO (Maybe Text)
+getArgs = parseArgs <$> Env.getArgs
+
+parseArgs :: [String] -> Maybe Text
+parseArgs [search] = Just $ Text.pack search
+parseArgs _ = Nothing
+
+runApp :: Text -> IO ()
+runApp = runGetPassword >=> either printError printPassword
+
+runGetPassword :: Text -> IO (Either LastPassError Text)
+runGetPassword = runExceptT . LastPass.runLastPassT . GetPassword.getPassword
+
+printPassword :: Text -> IO ()
+printPassword = TextIO.putStrLn
+
+printError :: LastPassError -> IO ()
+printError err = TextIO.putStrLn ("Error: " <> Text.pack (show err))
+
+printUsage :: IO ()
+printUsage = do
+  name <- Env.getProgName
+  TextIO.putStrLn ("Usage: " <> Text.pack name <> " <search>")

@@ -1,7 +1,8 @@
 module LastPass (MonadLastPass (..), LassPassT (..), LastPassError (..)) where
 
+import Control.Monad (void)
 import Control.Monad.Error.Class (MonadError (catchError, throwError), liftEither)
-import Control.Monad.Except (ExceptT, void)
+import Control.Monad.Except (ExceptT)
 import Control.Monad.Trans (MonadTrans (lift))
 import Data.Bifunctor (first)
 import Data.Text (Text)
