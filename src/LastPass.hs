@@ -28,17 +28,22 @@ class (MonadError LastPassError m, Monad m) => MonadLastPass m where
   listPasswords :: m [Entry]
   showPassword :: Text -> m Text
 
-run :: FilePath -> [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) Text
+run :: FilePath -> [String] -> e -> IO (Either e Text)
 run cmd args err = do
-  (exitCode, output, _) <-
-    lift $
-      lift $ readProcessWithExitCode cmd args ""
+  (exitCode, output, _) <- readProcessWithExitCode cmd args ""
   case exitCode of
-    ExitSuccess -> return output
-    _ -> liftEither (Left err)
+    ExitSuccess -> return (Right output)
+    _ -> return (Left err)
+
+lpass' :: [String] -> LastPassError -> IO (Either LastPassError Text)
+lpass' = run "lpass"
 
 lpass :: [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) Text
-lpass = run "lpass"
+lpass args err = do
+  result <- lift $ lift $ lpass' args err
+  case result of
+    Left e -> throwError e
+    Right output -> return output
 
 instance MonadLastPass (LassPassT (ExceptT LastPassError IO)) where
   checkIsInstalled =
@@ -52,7 +57,7 @@ instance MonadLastPass (LassPassT (ExceptT LastPassError IO)) where
     liftEither $ first LastPassListPasswordsParseFailed (parseEntryList output)
 
   showPassword entryId =
-    run "lpass" ["show", "--password", Text.unpack entryId] (LastPassShowPasswordFailed "fixme")
+    lpass ["show", "--password", Text.unpack entryId] (LastPassShowPasswordFailed "fixme")
 
 newtype LassPassT m a = LassPassT {runLastPassT :: m a}
   deriving (Functor, Applicative, Monad)
