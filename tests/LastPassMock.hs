@@ -12,15 +12,15 @@ import Control.Monad.RWS (MonadState, RWS, runRWS)
 import Control.Monad.State (get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Text (Text)
+import Entry (Entry (Entry))
 import LastPass (LastPassError, MonadLastPass (..))
-import PasswordEntry (PasswordEntry (PasswordEntry))
 
 type Command = Text
 
 data Results = Results
   { checkIsInstalledResult :: Either LastPassError (),
     checkIsLoggedInResult :: Either LastPassError (),
-    listPasswordsResult :: Either LastPassError [PasswordEntry],
+    listPasswordsResult :: Either LastPassError [Entry],
     showPasswordResult :: Either LastPassError Text
   }
 
@@ -43,7 +43,7 @@ defaultResults =
   Results
     { checkIsInstalledResult = Right (),
       checkIsLoggedInResult = Right (),
-      listPasswordsResult = Right [PasswordEntry "default-id" "default-name" "default-url"],
+      listPasswordsResult = Right [Entry "default-id" "default-name" "default-url"],
       showPasswordResult = Right ""
     }
 
@@ -74,7 +74,7 @@ checkIsLoggedInWillReturn :: LastPassResult () -> MockLastPass ()
 checkIsLoggedInWillReturn returnValue = do
   modify $ \state -> state {checkIsLoggedInResult = returnValue}
 
-listPasswordsWillReturn :: LastPassResult [PasswordEntry] -> MockLastPass ()
+listPasswordsWillReturn :: LastPassResult [Entry] -> MockLastPass ()
 listPasswordsWillReturn returnValue = do
   modify $ \state -> state {listPasswordsResult = returnValue}
 

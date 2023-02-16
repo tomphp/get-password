@@ -1,5 +1,6 @@
 module GetPasswordSpec (spec) where
 
+import Entry (Entry (Entry, id, name, url))
 import GetPassword (getPassword)
 import LastPass (LastPassError (..))
 import LastPassMock
@@ -9,7 +10,6 @@ import LastPassMock
     runMock,
     showPasswordWillReturn,
   )
-import PasswordEntry (PasswordEntry (PasswordEntry, id, name, url))
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 spec :: Spec
@@ -58,7 +58,7 @@ spec = do
       let (result, history) = runMock $ do
             listPasswordsWillReturn
               ( Right
-                  [ PasswordEntry {id = "entry-id", name = "contains search", url = "url"}
+                  [ Entry {id = "entry-id", name = "contains search", url = "url"}
                   ]
               )
             showPasswordWillReturn (Left $ LastPassShowPasswordFailed "reason")
@@ -75,7 +75,7 @@ spec = do
       let (result, history) = runMock $ do
             listPasswordsWillReturn
               ( Right
-                  [ PasswordEntry {id = "entry-id", name = "does-not-match", url = "url"}
+                  [ Entry {id = "entry-id", name = "does-not-match", url = "url"}
                   ]
               )
             showPasswordWillReturn (Left $ LastPassShowPasswordFailed "reason")
@@ -91,8 +91,8 @@ spec = do
       let (result, history) = runMock $ do
             listPasswordsWillReturn
               ( Right
-                  [ PasswordEntry {id = "entry-id-1", name = "match one", url = "url1"},
-                    PasswordEntry {id = "entry-id-2", name = "match two", url = "url2"}
+                  [ Entry {id = "entry-id-1", name = "match one", url = "url1"},
+                    Entry {id = "entry-id-2", name = "match two", url = "url2"}
                   ]
               )
             showPasswordWillReturn (Left $ LastPassShowPasswordFailed "reason")
@@ -100,8 +100,8 @@ spec = do
       result
         `shouldBe` Left
           ( LastPassMultiplePasswordsFound
-              [ PasswordEntry {id = "entry-id-1", name = "match one", url = "url1"},
-                PasswordEntry {id = "entry-id-2", name = "match two", url = "url2"}
+              [ Entry {id = "entry-id-1", name = "match one", url = "url1"},
+                Entry {id = "entry-id-2", name = "match two", url = "url2"}
               ]
           )
       history
@@ -116,8 +116,8 @@ spec = do
               showPasswordWillReturn (Right "secret")
               listPasswordsWillReturn
                 ( Right
-                    [ PasswordEntry {id = "entry-id-1", name = "contains search", url = "url1"},
-                      PasswordEntry {id = "entry-id-2", name = "other", url = "url2"}
+                    [ Entry {id = "entry-id-1", name = "contains search", url = "url1"},
+                      Entry {id = "entry-id-2", name = "other", url = "url2"}
                     ]
                 )
               getPassword "search"
@@ -134,8 +134,8 @@ spec = do
             showPasswordWillReturn (Right "secret")
             listPasswordsWillReturn
               ( Right
-                  [ PasswordEntry {id = "entry-id-1", name = "does-not-match", url = "url1"},
-                    PasswordEntry {id = "entry-id-2", name = "matches", url = "http://example.com"}
+                  [ Entry {id = "entry-id-1", name = "does-not-match", url = "url1"},
+                    Entry {id = "entry-id-2", name = "matches", url = "http://example.com"}
                   ]
               )
             getPassword "example"
@@ -152,8 +152,8 @@ spec = do
             showPasswordWillReturn (Right "secret")
             listPasswordsWillReturn
               ( Right
-                  [ PasswordEntry {id = "entry-id-1", name = "does-not-match", url = "url1"},
-                    PasswordEntry {id = "entry-id-2", name = "matches", url = "http://example.com"}
+                  [ Entry {id = "entry-id-1", name = "does-not-match", url = "url1"},
+                    Entry {id = "entry-id-2", name = "matches", url = "http://example.com"}
                   ]
               )
             getPassword "example"

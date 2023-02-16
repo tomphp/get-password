@@ -1,7 +1,7 @@
 module EntryListParserSpec (spec) where
 
+import Entry (Entry (Entry, id, name, url))
 import EntryListParser (parseEntryList)
-import PasswordEntry (PasswordEntry (PasswordEntry, id, name, url))
 import Test.Hspec
 
 spec :: Spec
@@ -17,6 +17,6 @@ spec = describe "parseEntryList" $ do
           ]
       )
       `shouldBe` Right
-        [ PasswordEntry {id = "11111", name = "ebay", url = "http://www.ebay.com"},
-          PasswordEntry {id = "22222", name = "amazon", url = "http://www.amazon.com"}
+        [ Entry {id = "11111", name = "ebay", url = "http://www.ebay.com"},
+          Entry {id = "22222", name = "amazon", url = "http://www.amazon.com"}
         ]

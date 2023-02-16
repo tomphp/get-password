@@ -1,8 +1,8 @@
-module PasswordEntry (PasswordEntry (..)) where
+module Entry (Entry (..)) where
 
 import Data.Text (Text)
 
-data PasswordEntry = PasswordEntry
+data Entry = Entry
   { id :: !Text,
     name :: !Text,
     url :: !Text

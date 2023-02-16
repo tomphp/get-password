@@ -4,25 +4,25 @@ import Control.Monad (void)
 import Data.Bifunctor (Bifunctor (first))
 import Data.Text (Text, pack)
 import Data.Void (Void)
-import PasswordEntry (PasswordEntry (PasswordEntry, id, name, url))
+import Entry (Entry (Entry, id, name, url))
 import Text.Megaparsec (MonadParsec (eof), Parsec, anySingle, between, many, manyTill, noneOf, parse, some, try, (<?>), (<|>))
 import Text.Megaparsec.Char (char, digitChar, eol, spaceChar)
 import Text.Megaparsec.Error (errorBundlePretty)
 
-parseEntryList :: Text -> Either String [PasswordEntry]
+parseEntryList :: Text -> Either String [Entry]
 parseEntryList = first errorBundlePretty . parse entries ""
 
-entries :: Parsec Void Text [PasswordEntry]
+entries :: Parsec Void Text [Entry]
 entries = many entry
 
-entry :: Parsec Void Text PasswordEntry
+entry :: Parsec Void Text Entry
 entry = do
   id' <- entryId
   void spaceChar
   name <- entryName
   void spaceChar
   url <- entryUrl
-  return PasswordEntry {id = id', ..}
+  return Entry {id = id', ..}
 
 entryId :: Parsec Void Text Text
 entryId = pack <$> some digitChar <?> "Entry ID"

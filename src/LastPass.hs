@@ -5,9 +5,9 @@ import Control.Monad.Except (ExceptT, void)
 import Control.Monad.Trans (MonadTrans (lift))
 import Data.Bifunctor (first)
 import Data.Text (Text, unpack)
+import Entry (Entry)
 import EntryListParser (parseEntryList)
 import GHC.IO.Exception (ExitCode (ExitSuccess))
-import PasswordEntry (PasswordEntry)
 import System.Process.Text (readProcessWithExitCode)
 
 data LastPassError
@@ -17,13 +17,13 @@ data LastPassError
   | LastPassListPasswordsParseFailed String
   | LastPassShowPasswordFailed String
   | LastPassPasswordNotFound
-  | LastPassMultiplePasswordsFound [PasswordEntry]
+  | LastPassMultiplePasswordsFound [Entry]
   deriving (Show, Eq)
 
 class (MonadError LastPassError m, Monad m) => MonadLastPass m where
   checkIsInstalled :: m ()
   checkIsLoggedIn :: m ()
-  listPasswords :: m [PasswordEntry]
+  listPasswords :: m [Entry]
   showPassword :: Text -> m Text
 
 run :: FilePath -> [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) Text
