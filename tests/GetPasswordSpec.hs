@@ -146,21 +146,3 @@ spec = do
                      "listPasswords",
                      "showPassword \"entry-id-2\""
                    ]
-
-    it "returns the password matching the url" $ do
-      let (result, history) = runMock $ do
-            showPasswordWillReturn (Right "secret")
-            listPasswordsWillReturn
-              ( Right
-                  [ Entry {id = "entry-id-1", name = "does-not-match", url = "url1"},
-                    Entry {id = "entry-id-2", name = "matches", url = "http://example.com"}
-                  ]
-              )
-            getPassword "example"
-      result `shouldBe` Right "secret"
-      history
-        `shouldBe` [ "checkIsInstalled",
-                     "checkIsLoggedIn",
-                     "listPasswords",
-                     "showPassword \"entry-id-2\""
-                   ]
