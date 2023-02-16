@@ -4,7 +4,8 @@ import Control.Monad.Error.Class (MonadError (catchError, throwError), liftEithe
 import Control.Monad.Except (ExceptT, void)
 import Control.Monad.Trans (MonadTrans (lift))
 import Data.Bifunctor (first)
-import Data.Text (Text, unpack)
+import Data.Text (Text)
+import qualified Data.Text as Text
 import Entry (Entry)
 import EntryListParser (parseEntryList)
 import GHC.IO.Exception (ExitCode (ExitSuccess))
@@ -50,7 +51,7 @@ instance MonadLastPass (LassPassT (ExceptT LastPassError IO)) where
     liftEither $ first LastPassListPasswordsParseFailed (parseEntryList output)
 
   showPassword entryId =
-    run "lpass" ["show", "--password", unpack entryId] (LastPassShowPasswordFailed "fixme")
+    run "lpass" ["show", "--password", Text.unpack entryId] (LastPassShowPasswordFailed "fixme")
 
 newtype LassPassT m a = LassPassT {runLastPassT :: m a}
   deriving (Functor, Applicative, Monad)
