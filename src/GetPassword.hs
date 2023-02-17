@@ -5,8 +5,9 @@ import Control.Monad.Except (MonadError (throwError))
 import Data.Text (Text)
 import Entry (Entry)
 import qualified Entry
-import LastPass (LastPassError (LastPassMultiplePasswordsFound, LastPassPasswordNotFound), MonadLastPass)
+import LastPass (MonadLastPass)
 import qualified LastPass
+import LastPassError (LastPassError (LastPassMultiplePasswordsFound, LastPassPasswordNotFound))
 
 getPassword :: (MonadLastPass m, MonadError LastPassError m) => Text -> m Text
 getPassword search = do

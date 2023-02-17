@@ -13,7 +13,8 @@ import Control.Monad.State (get, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Text (Text)
 import Entry (Entry (Entry))
-import LastPass (LastPassError, MonadLastPass (..))
+import LastPass (MonadLastPass (..))
+import LastPassError (LastPassError)
 
 type Command = Text
 

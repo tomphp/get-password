@@ -1,4 +1,4 @@
-module EntryListParser (parseEntryList) where
+module EntryListParser (parse) where
 
 import Control.Monad (void)
 import Data.Bifunctor (Bifunctor (first))
@@ -6,12 +6,13 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void (Void)
 import Entry (Entry (Entry, id, name, url))
-import Text.Megaparsec (MonadParsec (eof), Parsec, anySingle, between, many, manyTill, noneOf, parse, some, try, (<?>), (<|>))
+import Text.Megaparsec (MonadParsec (eof), Parsec, anySingle, between, many, manyTill, noneOf, some, try, (<?>), (<|>))
+import qualified Text.Megaparsec
 import Text.Megaparsec.Char (char, digitChar, eol, spaceChar)
 import Text.Megaparsec.Error (errorBundlePretty)
 
-parseEntryList :: Text -> Either String [Entry]
-parseEntryList = first errorBundlePretty . parse entries ""
+parse :: Text -> Either String [Entry]
+parse = first errorBundlePretty . Text.Megaparsec.parse entries ""
 
 entries :: Parsec Void Text [Entry]
 entries = many entry

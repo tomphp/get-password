@@ -6,8 +6,8 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import qualified GetPassword
-import LastPass (LastPassError)
 import qualified LastPass
+import LastPassError (LastPassError)
 import qualified System.Environment as Env
 
 main :: IO ()

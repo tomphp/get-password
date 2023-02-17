@@ -1,66 +1,31 @@
-module LastPass (MonadLastPass (..), LassPassT (..), LastPassError (..)) where
+module LastPass (MonadLastPass (..), LassPassT (..)) where
 
-import Control.Monad (void)
 import Control.Monad.Error.Class (MonadError (catchError, throwError), liftEither)
 import Control.Monad.Except (ExceptT)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans (lift))
-import Data.Bifunctor (first)
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Entry (Entry)
-import EntryListParser (parseEntryList)
-import GHC.IO.Exception (ExitCode (ExitSuccess))
-import System.Process.Text (readProcessWithExitCode)
+import qualified LastPassCli
+import LastPassError (LastPassError)
 
-data LastPassError
-  = LastPassNotInstalled
-  | LastPassNotLoggedIn
-  | LastPassListPasswordsFailed
-  | LastPassListPasswordsParseFailed String
-  | LastPassShowPasswordFailed String
-  | LastPassPasswordNotFound
-  | LastPassMultiplePasswordsFound [Entry]
-  deriving (Show, Eq)
-
-class (MonadError LastPassError m, Monad m) => MonadLastPass m where
+class Monad m => MonadLastPass m where
   checkIsInstalled :: m ()
   checkIsLoggedIn :: m ()
   listPasswords :: m [Entry]
   showPassword :: Text -> m Text
 
-run :: FilePath -> [String] -> e -> IO (Either e Text)
-run cmd args err = do
-  (exitCode, output, _) <- readProcessWithExitCode cmd args ""
-  case exitCode of
-    ExitSuccess -> return (Right output)
-    _ -> return (Left err)
-
-lpass' :: [String] -> LastPassError -> IO (Either LastPassError Text)
-lpass' = run "lpass"
-
-lpass :: [String] -> LastPassError -> LassPassT (ExceptT LastPassError IO) Text
-lpass args err = do
-  result <- lift $ lift $ lpass' args err
-  case result of
-    Left e -> throwError e
-    Right output -> return output
-
 instance MonadLastPass (LassPassT (ExceptT LastPassError IO)) where
-  checkIsInstalled =
-    void $ lpass ["--version"] LastPassNotInstalled
+  checkIsInstalled = liftIO LastPassCli.checkIsInstalled >>= liftEither
 
-  checkIsLoggedIn =
-    void $ lpass ["status"] LastPassNotLoggedIn
+  checkIsLoggedIn = liftIO LastPassCli.checkIsLoggedIn >>= liftEither
 
-  listPasswords = do
-    output <- lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] LastPassListPasswordsFailed
-    liftEither $ first LastPassListPasswordsParseFailed (parseEntryList output)
+  listPasswords = liftIO LastPassCli.listPasswords >>= liftEither
 
-  showPassword entryId =
-    lpass ["show", "--password", Text.unpack entryId] (LastPassShowPasswordFailed "fixme")
+  showPassword entryId = liftIO (LastPassCli.showPassword entryId) >>= liftEither
 
 newtype LassPassT m a = LassPassT {runLastPassT :: m a}
-  deriving (Functor, Applicative, Monad)
+  deriving (Functor, Applicative, Monad, MonadIO)
 
 instance MonadTrans LassPassT where
   lift = LassPassT

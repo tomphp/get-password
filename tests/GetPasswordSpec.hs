@@ -2,7 +2,7 @@ module GetPasswordSpec (spec) where
 
 import Entry (Entry (Entry, id, name, url))
 import GetPassword (getPassword)
-import LastPass (LastPassError (..))
+import LastPassError (LastPassError (..))
 import LastPassMock
   ( checkIsInstalledWillReturn,
     checkIsLoggedInWillReturn,

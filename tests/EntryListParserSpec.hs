@@ -1,16 +1,16 @@
 module EntryListParserSpec (spec) where
 
 import Entry (Entry (Entry, id, name, url))
-import EntryListParser (parseEntryList)
+import EntryListParser (parse)
 import Test.Hspec
 
 spec :: Spec
-spec = describe "parseEntryList" $ do
+spec = describe "parse" $ do
   it "returns an empty list for an empty string" $ do
-    parseEntryList "" `shouldBe` Right []
+    parse "" `shouldBe` Right []
 
   it "returns entries" $ do
-    parseEntryList
+    parse
       ( mconcat
           [ "11111 \"ebay\" http://www.ebay.com\n",
             "22222 \"amazon\" http://www.amazon.com"
