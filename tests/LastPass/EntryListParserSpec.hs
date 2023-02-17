@@ -1,7 +1,7 @@
-module EntryListParserSpec (spec) where
+module LastPass.EntryListParserSpec (spec) where
 
-import Entry (Entry (Entry, id, name, url))
-import EntryListParser (parse)
+import LastPass.Entry (Entry (Entry, id, name, url))
+import LastPass.EntryListParser (parse)
 import Test.Hspec
 
 spec :: Spec

@@ -1,8 +1,8 @@
-module LastPassClass (MonadLastPass (..)) where
+module LastPass.Class (MonadLastPass (..)) where
 
 import Data.Text (Text)
-import Entry (Entry)
-import LastPassError (LastPassError)
+import LastPass.Entry (Entry)
+import LastPass.Error (LastPassError)
 
 class Monad m => MonadLastPass m where
   checkIsInstalled :: m (Either LastPassError ())

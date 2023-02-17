@@ -1,7 +1,7 @@
 module GetPasswordError (GetPasswordError (..)) where
 
-import Entry (Entry)
-import LastPassError (LastPassError)
+import LastPass.Entry (Entry)
+import LastPass.Error (LastPassError)
 
 data GetPasswordError
   = LastPassErrored LastPassError

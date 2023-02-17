@@ -1,4 +1,4 @@
-module LastPassError (LastPassError (..)) where
+module LastPass.Error (LastPassError (..)) where
 
 data LastPassError
   = NotInstalled

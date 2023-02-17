@@ -1,14 +1,14 @@
-module LastPassCli (checkIsInstalled, checkIsLoggedIn, listPasswords, showPassword) where
+module LastPass.Cli (checkIsInstalled, checkIsLoggedIn, listPasswords, showPassword) where
 
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Bifunctor (first)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Entry (Entry)
-import qualified EntryListParser
-import LastPassError (LastPassError)
-import qualified LastPassError as Error
+import LastPass.Entry (Entry)
+import qualified LastPass.EntryListParser as EntryListParser
+import LastPass.Error (LastPassError)
+import qualified LastPass.Error as Error
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process.Text (readProcessWithExitCode)
 

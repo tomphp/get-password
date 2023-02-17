@@ -1,11 +1,11 @@
-module EntryListParser (parse) where
+module LastPass.EntryListParser (parse) where
 
 import Control.Monad (void)
 import Data.Bifunctor (first)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void (Void)
-import Entry (Entry (Entry, id, name, url))
+import LastPass.Entry (Entry (Entry, id, name, url))
 import Text.Megaparsec (MonadParsec (eof), Parsec, anySingle, between, many, manyTill, noneOf, some, try, (<?>), (<|>))
 import qualified Text.Megaparsec
 import Text.Megaparsec.Char (char, digitChar, eol, spaceChar)

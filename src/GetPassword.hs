@@ -3,12 +3,12 @@ module GetPassword (getPassword) where
 import Control.Monad.Except (MonadError (throwError), liftEither)
 import Data.Bifunctor (first)
 import Data.Text (Text)
-import Entry (Entry)
-import qualified Entry
 import GetPasswordError (GetPasswordError (LastPassErrored, MultiplePasswordsFound, PasswordNotFound))
-import LastPassClass (MonadLastPass)
-import qualified LastPassClass as LastPass
-import LastPassError (LastPassError)
+import LastPass.Class (MonadLastPass)
+import qualified LastPass.Class as LastPass
+import LastPass.Entry (Entry)
+import qualified LastPass.Entry as Entry
+import LastPass.Error (LastPassError)
 
 getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m Text
 getPassword search = do

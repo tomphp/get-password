@@ -1,6 +1,6 @@
-module EntrySpec (spec) where
+module LastPass.EntrySpec (spec) where
 
-import Entry (Entry (Entry, id, name, url), matches)
+import LastPass.Entry (Entry (Entry, id, name, url), matches)
 import Test.Hspec
 
 spec :: Spec
