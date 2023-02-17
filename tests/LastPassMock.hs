@@ -1,5 +1,5 @@
 module LastPassMock
-  ( runMock,
+  ( run,
     checkIsInstalledWillReturn,
     checkIsLoggedInWillReturn,
     listPasswordsWillReturn,
@@ -102,5 +102,5 @@ instance MonadLastPass (ExceptT e (MockLastPassT Identity)) where
   listPasswords = lift listPasswords
   showPassword search = lift $ showPassword search
 
-runMock :: ExceptT e (MockLastPassT Identity) a -> (Either e a, [Command])
-runMock = runMockLastPass . runExceptT
+run :: ExceptT e (MockLastPassT Identity) a -> (Either e a, [Command])
+run = runMockLastPass . runExceptT
