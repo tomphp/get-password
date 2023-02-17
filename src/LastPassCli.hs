@@ -1,6 +1,7 @@
 module LastPassCli (checkIsInstalled, checkIsLoggedIn, listPasswords, showPassword) where
 
 import Control.Monad (void)
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Bifunctor (first)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -8,41 +9,42 @@ import Entry (Entry)
 import qualified EntryListParser
 import LastPassError
   ( LastPassError
-      ( LastPassListPasswordsFailed,
-        LastPassListPasswordsParseFailed,
-        LastPassNotInstalled,
-        LastPassNotLoggedIn,
-        LastPassShowPasswordFailed
+      ( ListPasswordsFailed,
+        ListPasswordsParseFailed,
+        NotInstalled,
+        NotLoggedIn,
+        ShowPasswordFailed
       ),
   )
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process.Text (readProcessWithExitCode)
 
-checkIsInstalled :: IO (Either LastPassError ())
+checkIsInstalled :: MonadIO m => m (Either LastPassError ())
 checkIsInstalled =
-  void <$> lpass ["--version"] LastPassNotInstalled
+  void <$> lpass ["--version"] NotInstalled
 
-checkIsLoggedIn :: IO (Either LastPassError ())
+checkIsLoggedIn :: MonadIO m => m (Either LastPassError ())
 checkIsLoggedIn =
-  void <$> lpass ["status"] LastPassNotLoggedIn
+  void <$> lpass ["status"] NotLoggedIn
 
-listPasswords :: IO (Either LastPassError [Entry])
-listPasswords =
-  (>>= parseEntryList) <$> lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] LastPassListPasswordsFailed
+listPasswords :: MonadIO m => m (Either LastPassError [Entry])
+listPasswords = do
+  output <- lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] ListPasswordsFailed
+  return (output >>= parseEntryList)
 
-showPassword :: Text -> IO (Either LastPassError Text)
+showPassword :: MonadIO m => Text -> m (Either LastPassError Text)
 showPassword entryId =
-  lpass ["show", "--password", Text.unpack entryId] (LastPassShowPasswordFailed "fixme")
+  lpass ["show", "--password", Text.unpack entryId] (ShowPasswordFailed "fixme")
 
 parseEntryList :: Text -> Either LastPassError [Entry]
-parseEntryList = first LastPassListPasswordsParseFailed . EntryListParser.parse
+parseEntryList = first ListPasswordsParseFailed . EntryListParser.parse
 
-lpass :: [String] -> LastPassError -> IO (Either LastPassError Text)
-lpass = run "lpass"
+lpass :: MonadIO m => [String] -> e -> m (Either e Text)
+lpass = runOrError "lpass"
 
-run :: FilePath -> [String] -> e -> IO (Either e Text)
-run cmd args err = do
-  (exitCode, output, _) <- readProcessWithExitCode cmd args ""
+runOrError :: MonadIO m => FilePath -> [String] -> e -> m (Either e Text)
+runOrError cmd args err = do
+  (exitCode, output, _) <- liftIO $ readProcessWithExitCode cmd args ""
   case exitCode of
     ExitSuccess -> return (Right output)
     _ -> return (Left err)

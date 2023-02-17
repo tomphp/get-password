@@ -1,7 +1,7 @@
 module EntryListParser (parse) where
 
 import Control.Monad (void)
-import Data.Bifunctor (Bifunctor (first))
+import Data.Bifunctor (first)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void (Void)

@@ -1,25 +1,44 @@
 module GetPassword (getPassword) where
 
-import Control.Monad (void)
-import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.Except (MonadError (throwError), liftEither)
+import Data.Bifunctor (first)
 import Data.Text (Text)
 import Entry (Entry)
 import qualified Entry
-import LastPass (MonadLastPass)
-import qualified LastPass
-import LastPassError (LastPassError (LastPassMultiplePasswordsFound, LastPassPasswordNotFound))
+import GetPasswordError (GetPasswordError (LastPassErrored, MultiplePasswordsFound, PasswordNotFound))
+import LastPassClass (MonadLastPass)
+import qualified LastPassClass as LastPass
+import LastPassError (LastPassError)
 
-getPassword :: (MonadLastPass m, MonadError LastPassError m) => Text -> m Text
+getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m Text
 getPassword search = do
-  void LastPass.checkIsInstalled
-  void LastPass.checkIsLoggedIn
+  checkLastPassIsInstalled
+  checkLastPassIsLoggedIn
 
-  results <- getMatchingEntries search
+  results <- getMatchingPasswords search
 
   case results of
-    [] -> throwError LastPassPasswordNotFound
-    [entry] -> LastPass.showPassword (Entry.id entry)
-    _ -> throwError (LastPassMultiplePasswordsFound results)
+    [] -> throwError PasswordNotFound
+    [entry] -> showPassword (Entry.id entry)
+    _ -> throwError (MultiplePasswordsFound results)
 
-getMatchingEntries :: (MonadLastPass m, MonadError LastPassError m) => Text -> m [Entry]
-getMatchingEntries search = filter (Entry.matches search) <$> LastPass.listPasswords
+checkLastPassIsInstalled :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
+checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled
+
+checkLastPassIsLoggedIn :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
+checkLastPassIsLoggedIn = wrapError LastPass.checkIsLoggedIn
+
+getMatchingPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m [Entry]
+getMatchingPasswords search = filter (Entry.matches search) <$> listPasswords
+
+listPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => m [Entry]
+listPasswords = wrapError LastPass.listPasswords
+
+showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m Text
+showPassword = wrapError . LastPass.showPassword
+
+wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (Either LastPassError a) -> m a
+wrapError = eitherToError LastPassErrored
+
+eitherToError :: (MonadLastPass m, MonadError e' m) => (e -> e') -> m (Either e a) -> m a
+eitherToError f = (>>= liftEither . first f)

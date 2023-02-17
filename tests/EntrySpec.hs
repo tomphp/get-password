@@ -29,6 +29,3 @@ spec = describe "Entry" $ do
     it "returns false when the search string partially matches the ID" $ do
       let entry = Entry {id = "12345", name = "ebay", url = "http://www.ebay.com"}
       matches "23" entry `shouldBe` False
-
-  it "is a test" $ do
-    True `shouldBe` True

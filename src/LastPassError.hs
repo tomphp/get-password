@@ -1,13 +1,9 @@
 module LastPassError (LastPassError (..)) where
 
-import Entry (Entry)
-
 data LastPassError
-  = LastPassNotInstalled
-  | LastPassNotLoggedIn
-  | LastPassListPasswordsFailed
-  | LastPassListPasswordsParseFailed String
-  | LastPassShowPasswordFailed String
-  | LastPassPasswordNotFound
-  | LastPassMultiplePasswordsFound [Entry]
+  = NotInstalled
+  | NotLoggedIn
+  | ListPasswordsFailed
+  | ListPasswordsParseFailed String
+  | ShowPasswordFailed String
   deriving (Show, Eq)
