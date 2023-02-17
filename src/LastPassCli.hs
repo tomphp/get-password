@@ -7,37 +7,30 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Entry (Entry)
 import qualified EntryListParser
-import LastPassError
-  ( LastPassError
-      ( ListPasswordsFailed,
-        ListPasswordsParseFailed,
-        NotInstalled,
-        NotLoggedIn,
-        ShowPasswordFailed
-      ),
-  )
+import LastPassError (LastPassError)
+import qualified LastPassError as Error
 import System.Exit (ExitCode (ExitSuccess))
 import System.Process.Text (readProcessWithExitCode)
 
 checkIsInstalled :: MonadIO m => m (Either LastPassError ())
 checkIsInstalled =
-  void <$> lpass ["--version"] NotInstalled
+  void <$> lpass ["--version"] Error.NotInstalled
 
 checkIsLoggedIn :: MonadIO m => m (Either LastPassError ())
 checkIsLoggedIn =
-  void <$> lpass ["status"] NotLoggedIn
+  void <$> lpass ["status"] Error.NotLoggedIn
 
 listPasswords :: MonadIO m => m (Either LastPassError [Entry])
 listPasswords = do
-  output <- lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] ListPasswordsFailed
+  output <- lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] Error.ListPasswordsFailed
   return (output >>= parseEntryList)
 
 showPassword :: MonadIO m => Text -> m (Either LastPassError Text)
 showPassword entryId =
-  lpass ["show", "--password", Text.unpack entryId] (ShowPasswordFailed "fixme")
+  lpass ["show", "--password", Text.unpack entryId] (Error.ShowPasswordFailed "fixme")
 
 parseEntryList :: Text -> Either LastPassError [Entry]
-parseEntryList = first ListPasswordsParseFailed . EntryListParser.parse
+parseEntryList = first Error.ListPasswordsParseFailed . EntryListParser.parse
 
 lpass :: MonadIO m => [String] -> e -> m (Either e Text)
 lpass = runOrError "lpass"
