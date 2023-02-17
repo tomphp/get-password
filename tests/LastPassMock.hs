@@ -1,9 +1,11 @@
 module LastPassMock
   ( run,
-    checkIsInstalledWillReturn,
-    checkIsLoggedInWillReturn,
     listPasswordsWillReturn,
     showPasswordWillReturn,
+    checkIsInstalledWillErrorWith,
+    checkIsLoggedInWillErrorWith,
+    listPasswordsWillErrorWith,
+    showPasswordWillErrorWith,
   )
 where
 
@@ -51,8 +53,6 @@ runMockLastPassT mock = do
 runMockLastPass :: MockLastPass a -> (a, [Command])
 runMockLastPass = runIdentity . runMockLastPassT
 
-type LastPassResult a = Either LastPassError a
-
 defaultResults :: Results
 defaultResults =
   Results
@@ -80,21 +80,29 @@ instance Monad m => MonadLastPass (MockLastPassT m) where
   showPassword search = do
     mockResult ("showPassword \"" <> search <> "\"") showPasswordResult
 
-checkIsInstalledWillReturn :: Monad m => LastPassResult () -> MockLastPassT m ()
-checkIsInstalledWillReturn returnValue = do
-  modify $ \state -> state {checkIsInstalledResult = returnValue}
+listPasswordsWillReturn :: Monad m => [Entry] -> MockLastPassT m ()
+listPasswordsWillReturn value = do
+  modify $ \state -> state {listPasswordsResult = Right value}
 
-checkIsLoggedInWillReturn :: Monad m => LastPassResult () -> MockLastPassT m ()
-checkIsLoggedInWillReturn returnValue = do
-  modify $ \state -> state {checkIsLoggedInResult = returnValue}
+showPasswordWillReturn :: Monad m => Text -> MockLastPassT m ()
+showPasswordWillReturn value = do
+  modify $ \state -> state {showPasswordResult = Right value}
 
-listPasswordsWillReturn :: Monad m => LastPassResult [Entry] -> MockLastPassT m ()
-listPasswordsWillReturn returnValue = do
-  modify $ \state -> state {listPasswordsResult = returnValue}
+checkIsInstalledWillErrorWith :: Monad m => LastPassError -> MockLastPassT m ()
+checkIsInstalledWillErrorWith err = do
+  modify $ \state -> state {checkIsInstalledResult = Left err}
 
-showPasswordWillReturn :: Monad m => LastPassResult Text -> MockLastPassT m ()
-showPasswordWillReturn returnValue = do
-  modify $ \state -> state {showPasswordResult = returnValue}
+checkIsLoggedInWillErrorWith :: Monad m => LastPassError -> MockLastPassT m ()
+checkIsLoggedInWillErrorWith err = do
+  modify $ \state -> state {checkIsLoggedInResult = Left err}
+
+listPasswordsWillErrorWith :: Monad m => LastPassError -> MockLastPassT m ()
+listPasswordsWillErrorWith err = do
+  modify $ \state -> state {listPasswordsResult = Left err}
+
+showPasswordWillErrorWith :: Monad m => LastPassError -> MockLastPassT m ()
+showPasswordWillErrorWith err = do
+  modify $ \state -> state {showPasswordResult = Left err}
 
 instance MonadLastPass (ExceptT e (MockLastPassT Identity)) where
   checkIsInstalled = lift checkIsInstalled
