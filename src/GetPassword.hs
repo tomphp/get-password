@@ -4,7 +4,7 @@ import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError), liftEither)
 import Data.Bifunctor (first)
 import Data.Text (Text)
-import LastPass (Entry, LastPassError, MonadLastPass)
+import LastPass (Entry, LastPassError, LastPassResult, MonadLastPass)
 import qualified LastPass
 import qualified LastPass.Entry as Entry
 
@@ -50,7 +50,7 @@ listPasswords = wrapError LastPass.listPasswords
 showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m Text
 showPassword = wrapError . LastPass.showPassword
 
-wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (Either LastPassError a) -> m a
+wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (LastPassResult a) -> m a
 wrapError = eitherToError LastPassErrored
 
 eitherToError :: (MonadLastPass m, MonadError e' m) => (e -> e') -> m (Either e a) -> m a

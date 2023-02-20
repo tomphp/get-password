@@ -1,12 +1,12 @@
 module LastPass.Class (MonadLastPass (..)) where
 
 import Data.Text (Text)
+import LastPass.Cli (LastPassResult)
 import LastPass.Entry (Entry)
-import LastPass.Error (LastPassError)
 
 class Monad m => MonadLastPass m where
-  checkIsInstalled :: m (Either LastPassError ())
+  checkIsInstalled :: m (LastPassResult ())
   isLoggedIn :: m Bool
-  login :: Text -> m (Either LastPassError ())
-  listPasswords :: m (Either LastPassError [Entry])
-  showPassword :: Text -> m (Either LastPassError Text)
+  login :: Text -> m (LastPassResult ())
+  listPasswords :: m (LastPassResult [Entry])
+  showPassword :: Text -> m (LastPassResult Text)

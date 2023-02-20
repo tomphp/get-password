@@ -17,16 +17,16 @@ import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Text (Text)
-import LastPass (Entry (Entry), LastPassError, MonadLastPass (..))
+import LastPass (Entry (Entry), LastPassError, LastPassResult, MonadLastPass (..))
 
 type Command = Text
 
 data Results = Results
-  { checkIsInstalledResult :: Either LastPassError (),
+  { checkIsInstalledResult :: LastPassResult (),
     isLoggedInResult :: Bool,
-    loginResult :: Either LastPassError (),
-    listPasswordsResult :: Either LastPassError [Entry],
-    showPasswordResult :: Either LastPassError Text
+    loginResult :: LastPassResult (),
+    listPasswordsResult :: LastPassResult [Entry],
+    showPasswordResult :: LastPassResult Text
   }
 
 type MockLastPass = MockLastPassT Identity
