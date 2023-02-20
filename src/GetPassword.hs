@@ -1,5 +1,6 @@
 module GetPassword (getPassword, GetPasswordError (..)) where
 
+import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError), liftEither)
 import Data.Bifunctor (first)
 import Data.Text (Text)
@@ -9,14 +10,20 @@ import qualified LastPass.Entry as Entry
 
 data GetPasswordError
   = LastPassErrored LastPassError
+  | NotLoggedIn
   | PasswordNotFound
   | MultiplePasswordsFound [Entry]
   deriving (Show, Eq)
 
-getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m Text
-getPassword search = do
+getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe Text -> Text -> m Text
+getPassword user search = do
   checkLastPassIsInstalled
-  checkLastPassIsLoggedIn
+  loggedIn <- isLoggedIn
+
+  unless loggedIn $ do
+    case user of
+      Nothing -> throwError NotLoggedIn
+      Just u -> login u
 
   results <- getMatchingPasswords search
 
@@ -28,8 +35,11 @@ getPassword search = do
 checkLastPassIsInstalled :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
 checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled
 
-checkLastPassIsLoggedIn :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
-checkLastPassIsLoggedIn = wrapError LastPass.checkIsLoggedIn
+isLoggedIn :: (MonadLastPass m, MonadError GetPasswordError m) => m Bool
+isLoggedIn = LastPass.isLoggedIn
+
+login :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m ()
+login = wrapError . LastPass.login
 
 getMatchingPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m [Entry]
 getMatchingPasswords search = filter (Entry.matches search) <$> listPasswords

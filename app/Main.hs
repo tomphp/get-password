@@ -1,20 +1,28 @@
 module Main where
 
+import Config (Config (Config), LoadConfigError (LoadConfigError))
+import qualified Config
 import Control.Monad ((>=>))
 import Control.Monad.Except (runExceptT)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
-import qualified GetPassword
 import GetPassword (GetPasswordError (..))
+import qualified GetPassword
+import LastPass (LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
 import qualified LastPass
-import qualified System.Environment as Env
 import qualified LastPass.Entry as Entry
-import LastPass (LastPassError (..))
+import qualified System.Environment as Env
 import System.IO (stderr)
 
 main :: IO ()
-main = getArgs >>= maybe printUsage runApp
+main = do
+  config <- Config.loadConfig
+  case config of
+    Left err -> printLoadConfigError err
+    Right Config {user} -> do
+      args <- getArgs
+      maybe printUsage (runApp user) args
 
 getArgs :: IO (Maybe Text)
 getArgs = parseArgs <$> Env.getArgs
@@ -23,17 +31,23 @@ parseArgs :: [String] -> Maybe Text
 parseArgs [search] = Just $ Text.pack search
 parseArgs _ = Nothing
 
-runApp :: Text -> IO ()
-runApp = runGetPassword >=> either printError printPassword
+runApp :: Maybe Text -> Text -> IO ()
+runApp user = runGetPassword user >=> either printError printPassword
 
-runGetPassword :: Text -> IO (Either GetPasswordError Text)
-runGetPassword = runExceptT . LastPass.runLastPassT . GetPassword.getPassword
+runGetPassword :: Maybe Text -> Text -> IO (Either GetPasswordError Text)
+runGetPassword user = runExceptT . LastPass.runLastPassT . GetPassword.getPassword user
+
+---
 
 printPassword :: Text -> IO ()
 printPassword = TextIO.putStrLn
 
+printLoadConfigError :: LoadConfigError -> IO ()
+printLoadConfigError (LoadConfigError err) = putErrorLn ("Config Error: " <> err)
+
 printError :: GetPasswordError -> IO ()
 printError PasswordNotFound = putErrorLn "Error: No matching entries found"
+printError NotLoggedIn = putErrorLn "Error: Not logged in. Please login with `lpass login`"
 printError (MultiplePasswordsFound entries) = do
   putErrorLn "Error: Multiple entries found:"
   putErrorLn "Matching entries:"
@@ -42,7 +56,7 @@ printError (LastPassErrored err) = printLastPassError err
 
 printLastPassError :: LastPassError -> IO ()
 printLastPassError NotInstalled = putErrorLn "Error: LastPass CLI not installed. Please install with `brew install lastpass-cli`"
-printLastPassError NotLoggedIn = putErrorLn "Error: Not logged in. Please login with `lpass login`"
+printLastPassError LoginFailed = putErrorLn "Error: Failed to login in"
 printLastPassError ListPasswordsFailed = putErrorLn "Error: Failed to list passwords"
 printLastPassError (ListPasswordsParseFailed _) = putErrorLn "Error: Failed to parse list passwords output"
 printLastPassError (ShowPasswordFailed _) = putErrorLn "Error: Failed to show password"

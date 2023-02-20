@@ -2,7 +2,7 @@ module LastPass.Error (LastPassError (..)) where
 
 data LastPassError
   = NotInstalled
-  | NotLoggedIn
+  | LoginFailed
   | ListPasswordsFailed
   | ListPasswordsParseFailed String
   | ShowPasswordFailed String

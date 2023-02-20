@@ -20,6 +20,7 @@ instance MonadError e m => MonadError e (LastPassT m) where
 
 instance MonadIO m => MonadLastPass (LastPassT m) where
   checkIsInstalled = Cli.checkIsInstalled
-  checkIsLoggedIn = Cli.checkIsLoggedIn
+  isLoggedIn = Cli.isLoggedIn
+  login = Cli.login
   listPasswords = Cli.listPasswords
   showPassword = Cli.showPassword
