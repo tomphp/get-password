@@ -20,10 +20,7 @@ getPassword user search = do
   checkLastPassIsInstalled
   loggedIn <- isLoggedIn
 
-  unless loggedIn $ do
-    case user of
-      Nothing -> throwError NotLoggedIn
-      Just u -> login u
+  unless loggedIn (attemptLogin user)
 
   results <- getMatchingPasswords search
 
@@ -37,6 +34,9 @@ checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled
 
 isLoggedIn :: (MonadLastPass m, MonadError GetPasswordError m) => m Bool
 isLoggedIn = LastPass.isLoggedIn
+
+attemptLogin :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe Text -> m ()
+attemptLogin = maybe (throwError NotLoggedIn) login
 
 login :: (MonadLastPass m, MonadError GetPasswordError m) => Text -> m ()
 login = wrapError . LastPass.login
