@@ -27,7 +27,7 @@ main' = do
     Left err -> printLoadConfigError err
     Right Config {user} -> do
       args <- liftIO getArgs
-      maybe printUsage (getPasswordAndPrint user) args
+      maybe printUsage (LastPass.runCliLastPassT . getPasswordAndPrint user) args
 
 getArgs :: MonadIO m => m (Maybe Search)
 getArgs = parseArgs <$> liftIO Env.getArgs
@@ -36,8 +36,8 @@ parseArgs :: [String] -> Maybe Search
 parseArgs [search] = Just $ Search $ Text.pack search
 parseArgs _ = Nothing
 
-getPasswordAndPrint :: (MonadPrinter m, MonadIO m) => Maybe User -> Search -> m ()
-getPasswordAndPrint user = LastPass.runCliLastPassT . runGetPassword user >=> either printError printPassword
+getPasswordAndPrint :: (MonadLastPass m, MonadPrinter m, MonadIO m) => Maybe User -> Search -> m ()
+getPasswordAndPrint user = runGetPassword user >=> either printError printPassword
 
 runGetPassword :: (MonadIO m, MonadLastPass m) => Maybe User -> Search -> m (Either GetPasswordError Password)
 runGetPassword user = runExceptT . GetPassword.getPassword user

@@ -7,10 +7,11 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans (MonadTrans (lift))
 import LastPass.Class (MonadLastPass (..))
 import qualified LastPass.Cli as Cli
+import Printer.Class (MonadPrinter)
 
 newtype CliLastPassT m a = CliLastPassT {runCliLastPassT :: m a}
   deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO)
+  deriving newtype (Applicative, Monad, MonadIO, MonadPrinter)
 
 instance MonadTrans CliLastPassT where
   lift = CliLastPassT
