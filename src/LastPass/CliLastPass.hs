@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module LastPass.LastPass (LastPassT (..)) where
+module LastPass.CliLastPass (CliLastPassT (..)) where
 
 import Control.Monad.Error.Class (MonadError (catchError, throwError))
 import Control.Monad.IO.Class (MonadIO)
@@ -8,18 +8,18 @@ import Control.Monad.Trans (MonadTrans (lift))
 import LastPass.Class (MonadLastPass (..))
 import qualified LastPass.Cli as Cli
 
-newtype LastPassT m a = LastPassT {runLastPassT :: m a}
+newtype CliLastPassT m a = CliLastPassT {runCliLastPassT :: m a}
   deriving stock (Functor)
   deriving newtype (Applicative, Monad, MonadIO)
 
-instance MonadTrans LastPassT where
-  lift = LastPassT
+instance MonadTrans CliLastPassT where
+  lift = CliLastPassT
 
-instance MonadError e m => MonadError e (LastPassT m) where
+instance MonadError e m => MonadError e (CliLastPassT m) where
   throwError = lift . throwError
-  catchError (LastPassT m) f = LastPassT $ catchError m (runLastPassT . f)
+  catchError (CliLastPassT m) f = CliLastPassT $ catchError m (runCliLastPassT . f)
 
-instance MonadIO m => MonadLastPass (LastPassT m) where
+instance MonadIO m => MonadLastPass (CliLastPassT m) where
   checkIsInstalled = Cli.checkIsInstalled
   isLoggedIn = Cli.isLoggedIn
   login = Cli.login

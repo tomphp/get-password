@@ -36,7 +36,7 @@ parseArgs [search] = Just $ Search $ Text.pack search
 parseArgs _ = Nothing
 
 getPasswordAndPrint :: (MonadPrinter m, MonadIO m) => Maybe User -> Search -> m ()
-getPasswordAndPrint user = LastPass.runLastPassT . runGetPassword user >=> either printError printPassword
+getPasswordAndPrint user = LastPass.runCliLastPassT . runGetPassword user >=> either printError printPassword
 
 runGetPassword :: (MonadIO m, MonadLastPass m) => Maybe User -> Search -> m (Either GetPasswordError Password)
 runGetPassword user = runExceptT . GetPassword.getPassword user
