@@ -2,6 +2,7 @@ module ConfigSpec (spec) where
 
 import Config (Config (Config, user), LoadConfigError (LoadConfigError), ReadConfigError (ConfigFileDoesNotExist, ConfigFileParseError), defaultIfDoesNotExist, getConfigPath, readConfig)
 import Control.Exception (bracket_, catch)
+import LastPass (User (User))
 import System.Directory (removeFile)
 import System.Environment as Env
 import Test.Hspec
@@ -32,7 +33,7 @@ spec = describe "Config" $ do
     it "returns Config when file is empty" $ do
       writeFile "test-config.yml" "user: \"user@example.com\""
       readConfig "test-config.yml"
-        `shouldReturn` Right (Config {user = Just "user@example.com"})
+        `shouldReturn` Right (Config {user = Just $ User "user@example.com"})
 
     it "returns Config when file does not contina user" $ do
       writeFile "test-config.yml" "unknown: \"ignore me\""
@@ -40,13 +41,13 @@ spec = describe "Config" $ do
         `shouldReturn` Right (Config {user = Nothing})
 
   describe "defaultIfDoesNotExist" $ do
-    let defaultConfig = Config {user = Just "default@example.com"}
+    let defaultConfig = Config {user = Just $ User "default@example.com"}
 
     it "returns the default config when the config file does not exist" $ do
       defaultIfDoesNotExist defaultConfig (Left ConfigFileDoesNotExist) `shouldBe` Right defaultConfig
 
     it "returns the config when the config file exists and is valid" $ do
-      let testConfig = Config {user = Just "test@example.com"}
+      let testConfig = Config {user = Just $ User "test@example.com"}
       defaultIfDoesNotExist defaultConfig (Right testConfig) `shouldBe` Right testConfig
 
     it "returns the error when the config file exists and there is an error" $ do

@@ -9,9 +9,14 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import GetPassword (GetPasswordError (..))
 import qualified GetPassword
-import LastPass (LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
+import LastPass
+  ( Entry (Entry),
+    EntryID (EntryID),
+    LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed),
+    Search (Search),
+    User,
+  )
 import qualified LastPass
-import qualified LastPass.Entry as Entry
 import qualified System.Environment as Env
 import System.IO (stderr)
 
@@ -24,17 +29,17 @@ main = do
       args <- getArgs
       maybe printUsage (runApp user) args
 
-getArgs :: IO (Maybe Text)
+getArgs :: IO (Maybe Search)
 getArgs = parseArgs <$> Env.getArgs
 
-parseArgs :: [String] -> Maybe Text
-parseArgs [search] = Just $ Text.pack search
+parseArgs :: [String] -> Maybe Search
+parseArgs [search] = Just $ Search $ Text.pack search
 parseArgs _ = Nothing
 
-runApp :: Maybe Text -> Text -> IO ()
+runApp :: Maybe User -> Search -> IO ()
 runApp user = runGetPassword user >=> either printError printPassword
 
-runGetPassword :: Maybe Text -> Text -> IO (Either GetPasswordError Text)
+runGetPassword :: Maybe User -> Search -> IO (Either GetPasswordError Text)
 runGetPassword user = runExceptT . LastPass.runLastPassT . GetPassword.getPassword user
 
 ---
@@ -51,7 +56,7 @@ printError NotLoggedIn = putErrorLn "Error: Not logged in. Please login with `lp
 printError (MultiplePasswordsFound entries) = do
   putErrorLn "Error: Multiple entries found:"
   putErrorLn "Matching entries:"
-  mapM_ (\entry -> putErrorLn (" - " <> Entry.name entry <> " [" <> Entry.id entry <> "]")) entries
+  mapM_ printEntry entries
 printError (LastPassErrored err) = printLastPassError err
 
 printLastPassError :: LastPassError -> IO ()
@@ -60,6 +65,9 @@ printLastPassError LoginFailed = putErrorLn "Error: Failed to login in"
 printLastPassError ListPasswordsFailed = putErrorLn "Error: Failed to list passwords"
 printLastPassError (ListPasswordsParseFailed _) = putErrorLn "Error: Failed to parse list passwords output"
 printLastPassError (ShowPasswordFailed _) = putErrorLn "Error: Failed to show password"
+
+printEntry :: Entry -> IO ()
+printEntry Entry {id = EntryID entryID, name} = putErrorLn (" - " <> name <> " [" <> entryID <> "]")
 
 printUsage :: IO ()
 printUsage = do

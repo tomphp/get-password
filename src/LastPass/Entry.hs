@@ -1,22 +1,35 @@
-module LastPass.Entry (Entry (..), matches) where
+module LastPass.Entry (Entry (..), EntryID (EntryID), Search (Search), matches) where
 
 import Data.Text (Text, isInfixOf)
 import qualified Data.Text as Text
 
+newtype EntryID = EntryID Text
+  deriving (Show, Eq)
+
 data Entry = Entry
-  { id :: !Text,
+  { id :: !EntryID,
     name :: !Text,
     url :: !Text
   }
   deriving (Show, Eq)
 
-matches :: Text -> Entry -> Bool
+newtype Search = Search Text
+  deriving (Show, Eq)
+
+matches :: Search -> Entry -> Bool
 matches search entry
-  | lowerSearch == LastPass.Entry.id entry = True
-  | lowerSearch `isInfixOf` lowerName = True
-  | lowerSearch `isInfixOf` lowerUrl = True
+  | entryIDMatches search entryID = True
+  | nameMatches search name = True
+  | urlMatches search url = True
   | otherwise = False
   where
-    lowerSearch = Text.toLower search
-    lowerName = Text.toLower (name entry)
-    lowerUrl = Text.toLower (url entry)
+    Entry {id = entryID, name, url} = entry
+
+entryIDMatches :: Search -> EntryID -> Bool
+entryIDMatches (Search search) (EntryID entryID) = Text.toLower search == Text.toLower entryID
+
+nameMatches :: Search -> Text -> Bool
+nameMatches (Search search) name = Text.toLower search `isInfixOf` Text.toLower name
+
+urlMatches :: Search -> Text -> Bool
+urlMatches (Search search) url = Text.toLower search `isInfixOf` Text.toLower url

@@ -17,7 +17,7 @@ import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Text (Text)
-import LastPass (Entry (Entry), LastPassError, LastPassResult, MonadLastPass (..))
+import LastPass (Entry (Entry), EntryID (EntryID), LastPassError, LastPassResult, MonadLastPass (..), User (User))
 
 type Command = Text
 
@@ -59,7 +59,7 @@ defaultResults =
     { checkIsInstalledResult = Right (),
       isLoggedInResult = True,
       loginResult = Right (),
-      listPasswordsResult = Right [Entry "default-id" "default-name" "default-url"],
+      listPasswordsResult = Right [Entry (EntryID "default-id") "default-name" "default-url"],
       showPasswordResult = Right ""
     }
 
@@ -71,9 +71,9 @@ mockResult command getter = do
 instance Monad m => MonadLastPass (MockLastPassT m) where
   checkIsInstalled = mockResult "checkIsInstalled" checkIsInstalledResult
   isLoggedIn = mockResult "isLoggedIn" isLoggedInResult
-  login user = mockResult ("login \"" <> user <> "\"") loginResult
+  login (User user) = mockResult ("login \"" <> user <> "\"") loginResult
   listPasswords = mockResult "listPasswords" listPasswordsResult
-  showPassword search = mockResult ("showPassword \"" <> search <> "\"") showPasswordResult
+  showPassword (EntryID entryID) = mockResult ("showPassword \"" <> entryID <> "\"") showPasswordResult
 
 listPasswordsWillReturn :: Monad m => [Entry] -> MockLastPassT m ()
 listPasswordsWillReturn value =

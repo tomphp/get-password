@@ -7,7 +7,10 @@ import GetPassword
   )
 import LastPass
   ( Entry (Entry, id, name, url),
+    EntryID (EntryID),
     LastPassError (ListPasswordsFailed, LoginFailed, NotInstalled, ShowPasswordFailed),
+    Search (Search),
+    User (User),
   )
 import qualified LastPassMock as Mock
 import Test.Hspec (Spec, describe, it, shouldBe)
@@ -18,14 +21,14 @@ spec = do
     it "errors when lastpass is not installed" $ do
       let (result, history) = Mock.run $ do
             lift $ Mock.checkIsInstalledWillErrorWith NotInstalled
-            getPassword Nothing "search-string"
+            getPassword Nothing (Search "search-string")
       result `shouldBe` Left (LastPassErrored NotInstalled)
       history `shouldBe` ["checkIsInstalled"]
 
     it "errors when lastpass is not logged in and user is not provided" $ do
       let (result, history) = Mock.run $ do
             lift $ Mock.isLoggedInWillReturn False
-            getPassword Nothing "search-string"
+            getPassword Nothing (Search "search-string")
       result `shouldBe` Left NotLoggedIn
       history
         `shouldBe` [ "checkIsInstalled",
@@ -36,7 +39,7 @@ spec = do
       let (result, history) = Mock.run $ do
             lift $ Mock.isLoggedInWillReturn False
             lift $ Mock.loginWillErrorWith LoginFailed
-            getPassword (Just "user@example.com") "search-string"
+            getPassword (Just $ User "user@example.com") (Search "search-string")
       result `shouldBe` Left (LastPassErrored LoginFailed)
       history
         `shouldBe` [ "checkIsInstalled",
@@ -47,7 +50,7 @@ spec = do
     it "errors when list passwords fails" $ do
       let (result, history) = Mock.run $ do
             lift $ Mock.listPasswordsWillErrorWith ListPasswordsFailed
-            getPassword Nothing "search-string"
+            getPassword Nothing (Search "search-string")
       result `shouldBe` Left (LastPassErrored ListPasswordsFailed)
       history
         `shouldBe` [ "checkIsInstalled",
@@ -58,7 +61,7 @@ spec = do
     it "errors when not matches are found" $ do
       let (result, history) = Mock.run $ do
             lift $ Mock.listPasswordsWillErrorWith ListPasswordsFailed
-            getPassword Nothing "search-string"
+            getPassword Nothing (Search "search-string")
       result `shouldBe` Left (LastPassErrored ListPasswordsFailed)
       history
         `shouldBe` [ "checkIsInstalled",
@@ -70,10 +73,10 @@ spec = do
       let (result, history) = Mock.run $ do
             lift $
               Mock.listPasswordsWillReturn
-                [ Entry {id = "entry-id", name = "contains search", url = "url"}
+                [ Entry {id = EntryID "entry-id", name = "contains search", url = "url"}
                 ]
             lift $ Mock.showPasswordWillErrorWith (ShowPasswordFailed "reason")
-            getPassword Nothing "search"
+            getPassword Nothing (Search "search")
       result `shouldBe` Left (LastPassErrored $ ShowPasswordFailed "reason")
       history
         `shouldBe` [ "checkIsInstalled",
@@ -86,10 +89,10 @@ spec = do
       let (result, history) = Mock.run $ do
             lift $
               Mock.listPasswordsWillReturn
-                [ Entry {id = "entry-id", name = "does-not-match", url = "url"}
+                [ Entry {id = EntryID "entry-id", name = "does-not-match", url = "url"}
                 ]
             lift $ Mock.showPasswordWillErrorWith (ShowPasswordFailed "reason")
-            getPassword Nothing "search"
+            getPassword Nothing (Search "search")
       result `shouldBe` Left PasswordNotFound
       history
         `shouldBe` [ "checkIsInstalled",
@@ -101,16 +104,16 @@ spec = do
       let (result, history) = Mock.run $ do
             lift $
               Mock.listPasswordsWillReturn
-                [ Entry {id = "entry-id-1", name = "match one", url = "url1"},
-                  Entry {id = "entry-id-2", name = "match two", url = "url2"}
+                [ Entry {id = EntryID "entry-id-1", name = "match one", url = "url1"},
+                  Entry {id = EntryID "entry-id-2", name = "match two", url = "url2"}
                 ]
             lift $ Mock.showPasswordWillErrorWith (ShowPasswordFailed "reason")
-            getPassword Nothing "match"
+            getPassword Nothing (Search "match")
       result
         `shouldBe` Left
           ( MultiplePasswordsFound
-              [ Entry {id = "entry-id-1", name = "match one", url = "url1"},
-                Entry {id = "entry-id-2", name = "match two", url = "url2"}
+              [ Entry {id = EntryID "entry-id-1", name = "match one", url = "url1"},
+                Entry {id = EntryID "entry-id-2", name = "match two", url = "url2"}
               ]
           )
       history
@@ -126,10 +129,10 @@ spec = do
               lift $ Mock.showPasswordWillReturn "secret"
               lift $
                 Mock.listPasswordsWillReturn
-                  [ Entry {id = "entry-id-1", name = "contains search", url = "url1"},
-                    Entry {id = "entry-id-2", name = "other", url = "url2"}
+                  [ Entry {id = EntryID "entry-id-1", name = "contains search", url = "url1"},
+                    Entry {id = EntryID "entry-id-2", name = "other", url = "url2"}
                   ]
-              getPassword (Just "user@example.com") "search"
+              getPassword (Just $ User "user@example.com") (Search "search")
         result `shouldBe` Right "secret"
         history
           `shouldBe` [ "checkIsInstalled",
@@ -145,10 +148,10 @@ spec = do
               lift $ Mock.showPasswordWillReturn "secret"
               lift $
                 Mock.listPasswordsWillReturn
-                  [ Entry {id = "entry-id-1", name = "contains search", url = "url1"},
-                    Entry {id = "entry-id-2", name = "other", url = "url2"}
+                  [ Entry {id = EntryID "entry-id-1", name = "contains search", url = "url1"},
+                    Entry {id = EntryID "entry-id-2", name = "other", url = "url2"}
                   ]
-              getPassword Nothing "search"
+              getPassword Nothing (Search "search")
         result `shouldBe` Right "secret"
         history
           `shouldBe` [ "checkIsInstalled",
@@ -162,10 +165,10 @@ spec = do
             lift $ Mock.showPasswordWillReturn "secret"
             lift $
               Mock.listPasswordsWillReturn
-                [ Entry {id = "entry-id-1", name = "does-not-match", url = "url1"},
-                  Entry {id = "entry-id-2", name = "matches", url = "http://example.com"}
+                [ Entry {id = EntryID "entry-id-1", name = "does-not-match", url = "url1"},
+                  Entry {id = EntryID "entry-id-2", name = "matches", url = "http://example.com"}
                 ]
-            getPassword Nothing "example"
+            getPassword Nothing (Search "example")
       result `shouldBe` Right "secret"
       history
         `shouldBe` [ "checkIsInstalled",

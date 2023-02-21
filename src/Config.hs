@@ -13,17 +13,18 @@ module Config
 where
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Data.Bifunctor (first)
+import qualified Data.Bifunctor as Bifunctor
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Data.Yaml (FromJSON (parseJSON), ParseException, decodeFileEither, prettyPrintParseException, withObject, (.!=), (.:?))
+import Data.Yaml (FromJSON (parseJSON), ParseException, withObject, (.!=), (.:?))
+import qualified Data.Yaml as Yaml
 import GHC.Generics (Generic)
-import System.Directory (doesFileExist, getHomeDirectory)
+import LastPass (User)
+import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
-{-# HLINT ignore "Use newtype instead of data" #-}
-data Config = Config
-  { user :: Maybe Text
+newtype Config = Config
+  { user :: Maybe User
   }
   deriving (Show, Eq, Generic)
 
@@ -35,7 +36,7 @@ instance FromJSON Config where
 defaultConfig :: Config
 defaultConfig = Config {user = Nothing}
 
-data LoadConfigError = LoadConfigError !Text
+newtype LoadConfigError = LoadConfigError Text
   deriving (Show, Eq)
 
 loadConfig :: MonadIO m => m (Either LoadConfigError Config)
@@ -46,7 +47,7 @@ loadConfig = do
 
 getConfigPath :: MonadIO m => m FilePath
 getConfigPath = do
-  home <- liftIO getHomeDirectory
+  home <- liftIO Dir.getHomeDirectory
   return $ home </> ".config" </> "get-password" </> "config.yml"
 
 defaultIfDoesNotExist :: Config -> Either ReadConfigError Config -> Either LoadConfigError Config
@@ -61,10 +62,10 @@ data ReadConfigError
 
 readConfig :: MonadIO m => FilePath -> m (Either ReadConfigError Config)
 readConfig path = do
-  configExists <- liftIO $ doesFileExist path
+  configExists <- liftIO $ Dir.doesFileExist path
   if configExists
-    then first (ConfigFileParseError . Text.pack . prettyPrintParseException) <$> readAndParseFile path
+    then Bifunctor.first (ConfigFileParseError . Text.pack . Yaml.prettyPrintParseException) <$> readAndParseFile path
     else return (Left ConfigFileDoesNotExist)
 
 readAndParseFile :: MonadIO m => FilePath -> m (Either ParseException Config)
-readAndParseFile = liftIO . decodeFileEither
+readAndParseFile = liftIO . Yaml.decodeFileEither

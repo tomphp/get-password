@@ -1,6 +1,6 @@
 module LastPass.EntryListParserSpec (spec) where
 
-import LastPass.Entry (Entry (Entry, id, name, url))
+import LastPass.Entry (Entry (Entry, id, name, url), EntryID (EntryID))
 import LastPass.EntryListParser (parse)
 import Test.Hspec
 
@@ -17,6 +17,6 @@ spec = describe "parse" $ do
           ]
       )
       `shouldBe` Right
-        [ Entry {id = "11111", name = "ebay", url = "http://www.ebay.com"},
-          Entry {id = "22222", name = "amazon", url = "http://www.amazon.com"}
+        [ Entry {id = EntryID "11111", name = "ebay", url = "http://www.ebay.com"},
+          Entry {id = EntryID "22222", name = "amazon", url = "http://www.amazon.com"}
         ]
