@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Config.Config (Config (Config, user))
-import Config.Loader (ConfigLoaderMonad (loadConfig))
+import Config.Loader (ConfigLoader (loadConfig))
 import Config.MacLoader (MacLoaderT (runMacLoaderT))
 import Control.Monad ((>=>))
 import Control.Monad.Except (runExceptT)
@@ -19,7 +19,7 @@ main :: IO ()
 main = do
   runSimplePrinterT $ runMacLoaderT main'
 
-main' :: (ConfigLoaderMonad m, MonadPrinter m, MonadIO m) => m ()
+main' :: (ConfigLoader m, MonadPrinter m, MonadIO m) => m ()
 main' = do
   config <- loadConfig
   case config of

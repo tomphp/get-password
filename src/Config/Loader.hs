@@ -6,5 +6,5 @@ import Data.Text (Text)
 newtype LoadConfigError = LoadConfigError Text
   deriving stock (Show, Eq)
 
-class ConfigLoaderMonad m where
+class ConfigLoader m where
   loadConfig :: m (Either LoadConfigError Config)

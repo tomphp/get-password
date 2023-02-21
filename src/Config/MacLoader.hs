@@ -10,7 +10,7 @@ module Config.MacLoader
 where
 
 import Config.Config (Config (..), defaultConfig)
-import Config.Loader (ConfigLoaderMonad (loadConfig), LoadConfigError (LoadConfigError))
+import Config.Loader (ConfigLoader (loadConfig), LoadConfigError (LoadConfigError))
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans, lift)
 import qualified Data.Bifunctor as Bifunctor
@@ -18,24 +18,18 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Yaml (ParseException)
 import qualified Data.Yaml as Yaml
-import Printer.Class (MonadPrinter (printError, printLoadConfigError, printPassword, printUsage))
+import Printer.Class (MonadPrinter)
 import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
 newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
   deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO)
+  deriving newtype (Applicative, Monad, MonadIO, MonadPrinter)
 
 instance MonadTrans MacLoaderT where
   lift = MacLoaderT
 
-instance (Monad m, MonadPrinter m) => MonadPrinter (MacLoaderT m) where
-  printPassword = lift . printPassword
-  printUsage = lift printUsage
-  printError = lift . printError
-  printLoadConfigError = lift . printLoadConfigError
-
-instance MonadIO m => ConfigLoaderMonad (MacLoaderT m) where
+instance MonadIO m => ConfigLoader (MacLoaderT m) where
   loadConfig = liftIO loadConfig'
 
 loadConfig' :: MonadIO m => m (Either LoadConfigError Config)
