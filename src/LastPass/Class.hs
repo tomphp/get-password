@@ -1,5 +1,7 @@
 module LastPass.Class (LastPassResult, MonadLastPass (..), User (User), Password (Password)) where
 
+import Control.Monad.Except (ExceptT)
+import Control.Monad.Trans (MonadTrans (lift))
 import Data.Text (Text)
 import Data.Yaml (FromJSON)
 import GHC.Generics (Generic)
@@ -22,3 +24,10 @@ class Monad m => MonadLastPass m where
   login :: User -> m (LastPassResult ())
   listPasswords :: m (LastPassResult [Entry])
   showPassword :: EntryID -> m (LastPassResult Password)
+
+instance (MonadLastPass m, Monad m) => MonadLastPass (ExceptT e m) where
+  checkIsInstalled = lift checkIsInstalled
+  isLoggedIn = lift isLoggedIn
+  login = lift . login
+  listPasswords = lift listPasswords
+  showPassword = lift . showPassword

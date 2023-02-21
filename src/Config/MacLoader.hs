@@ -1,10 +1,7 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-module Config
-  ( Config (..),
+module Config.MacLoader
+  ( MacLoaderT (runMacLoaderT),
     ReadConfigError (..),
     LoadConfigError (..),
-    defaultConfig,
     defaultIfDoesNotExist,
     getConfigPath,
     loadConfig,
@@ -12,35 +9,36 @@ module Config
   )
 where
 
+import Config.Config (Config (..), defaultConfig)
+import Config.Loader (ConfigLoaderMonad (loadConfig), LoadConfigError (LoadConfigError))
 import Control.Monad.IO.Class (MonadIO (liftIO))
+import Control.Monad.Trans (MonadTrans, lift)
 import qualified Data.Bifunctor as Bifunctor
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Data.Yaml (FromJSON (parseJSON), ParseException, withObject, (.!=), (.:?))
+import Data.Yaml (ParseException)
 import qualified Data.Yaml as Yaml
-import GHC.Generics (Generic)
-import LastPass (User)
+import Printer.Class (MonadPrinter (printError, printLoadConfigError, printPassword, printUsage))
 import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
-newtype Config = Config
-  { user :: Maybe User
-  }
-  deriving (Show, Eq, Generic)
+newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
+  deriving (Functor, Applicative, Monad, MonadIO)
 
-instance FromJSON Config where
-  parseJSON = withObject "Config" $ \obj ->
-    Config
-      <$> obj .:? "user" .!= Nothing
+instance MonadTrans MacLoaderT where
+  lift = MacLoaderT
 
-defaultConfig :: Config
-defaultConfig = Config {user = Nothing}
+instance (Monad m, MonadPrinter m) => MonadPrinter (MacLoaderT m) where
+  printPassword = lift . printPassword
+  printUsage = lift printUsage
+  printError = lift . printError
+  printLoadConfigError = lift . printLoadConfigError
 
-newtype LoadConfigError = LoadConfigError Text
-  deriving (Show, Eq)
+instance MonadIO m => ConfigLoaderMonad (MacLoaderT m) where
+  loadConfig = liftIO loadConfig'
 
-loadConfig :: MonadIO m => m (Either LoadConfigError Config)
-loadConfig = do
+loadConfig' :: MonadIO m => m (Either LoadConfigError Config)
+loadConfig' = do
   path <- getConfigPath
   config <- readConfig path
   return $ defaultIfDoesNotExist defaultConfig config

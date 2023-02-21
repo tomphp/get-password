@@ -12,7 +12,7 @@ where
 
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.Identity (Identity (runIdentity))
-import Control.Monad.RWS (MonadRWS, MonadState, MonadTrans, RWST (runRWST), lift)
+import Control.Monad.RWS (MonadRWS, MonadState, MonadTrans, RWST (runRWST))
 import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
@@ -102,13 +102,6 @@ listPasswordsWillErrorWith err =
 showPasswordWillErrorWith :: Monad m => LastPassError -> MockLastPassT m ()
 showPasswordWillErrorWith err =
   modify $ \state -> state {showPasswordResult = Left err}
-
-instance MonadLastPass (ExceptT e (MockLastPassT Identity)) where
-  checkIsInstalled = lift checkIsInstalled
-  isLoggedIn = lift isLoggedIn
-  login = lift . login
-  listPasswords = lift listPasswords
-  showPassword search = lift $ showPassword search
 
 run :: ExceptT e (MockLastPassT Identity) a -> (Either e a, [Command])
 run = runMockLastPass . runExceptT
