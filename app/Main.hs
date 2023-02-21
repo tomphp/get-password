@@ -9,8 +9,9 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import qualified Data.Text as Text
 import GetPassword (GetPasswordError (..))
 import qualified GetPassword
-import LastPass (MonadLastPass, Password, Search (Search), User)
-import qualified LastPass
+import LastPass.Class (MonadLastPass, Password, User)
+import qualified LastPass.CliLastPass as LastPass
+import LastPass.Entry (Search (Search))
 import Printer.Class (MonadPrinter (printError, printLoadConfigError, printPassword, printUsage))
 import Printer.SimplePrinter (runSimplePrinterT)
 import qualified System.Environment as Env

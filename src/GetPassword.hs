@@ -3,10 +3,11 @@ module GetPassword (getPassword, GetPasswordError (..)) where
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError), liftEither)
 import qualified Data.Bifunctor as Bifunctor
-import LastPass (Entry, LastPassError, LastPassResult, MonadLastPass, Password, Search, User)
-import qualified LastPass
-import LastPass.Entry (EntryID)
+import LastPass.Class (LastPassResult, MonadLastPass, Password, User)
+import qualified LastPass.Class as LastPass
+import LastPass.Entry (Entry, EntryID, Search)
 import qualified LastPass.Entry as Entry
+import LastPass.Error (LastPassError)
 
 data GetPasswordError
   = LastPassErrored LastPassError

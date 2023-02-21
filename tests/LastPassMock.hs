@@ -17,7 +17,9 @@ import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Text (Text)
-import LastPass (Entry (Entry), EntryID (EntryID), LastPassError, LastPassResult, MonadLastPass (..), Password (Password), User (User))
+import LastPass.Class (LastPassResult, MonadLastPass (checkIsInstalled, isLoggedIn, listPasswords, login, showPassword), Password (Password), User (User))
+import LastPass.Entry (Entry (Entry), EntryID (EntryID))
+import LastPass.Error (LastPassError)
 
 type Command = Text
 

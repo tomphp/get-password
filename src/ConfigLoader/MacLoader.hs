@@ -1,7 +1,6 @@
 module ConfigLoader.MacLoader
   ( MacLoaderT (runMacLoaderT),
     ReadConfigError (..),
-    LoadConfigError (..),
     defaultIfDoesNotExist,
     getConfigPath,
     loadConfig,

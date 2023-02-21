@@ -1,9 +1,10 @@
 module ConfigLoader.MacLoaderSpec (spec) where
 
+import ConfigLoader.Class (LoadConfigError (LoadConfigError))
 import ConfigLoader.Config (Config (Config, user))
-import ConfigLoader.MacLoader (LoadConfigError (LoadConfigError), ReadConfigError (ConfigFileDoesNotExist, ConfigFileParseError), defaultIfDoesNotExist, getConfigPath, readConfig)
+import ConfigLoader.MacLoader (ReadConfigError (ConfigFileDoesNotExist, ConfigFileParseError), defaultIfDoesNotExist, getConfigPath, readConfig)
 import Control.Exception (bracket_, catch)
-import LastPass (User (User))
+import LastPass.Class (User (User))
 import System.Directory (removeFile)
 import System.Environment as Env
 import Test.Hspec

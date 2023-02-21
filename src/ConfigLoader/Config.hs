@@ -2,7 +2,7 @@ module ConfigLoader.Config (Config (..), defaultConfig) where
 
 import Data.Yaml (FromJSON (parseJSON), withObject, (.!=), (.:?))
 import GHC.Generics (Generic)
-import LastPass (User)
+import LastPass.Class (User)
 
 newtype Config = Config
   { user :: Maybe User

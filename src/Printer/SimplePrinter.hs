@@ -1,13 +1,15 @@
 module Printer.SimplePrinter (SimplePrinterT, runSimplePrinterT) where
 
-import ConfigLoader.MacLoader (LoadConfigError (LoadConfigError))
+import ConfigLoader.Class (LoadConfigError (LoadConfigError))
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans (lift))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import GetPassword (GetPasswordError (LastPassErrored, MultiplePasswordsFound, NotLoggedIn, PasswordNotFound))
-import LastPass (Entry (Entry, id, name), EntryID (EntryID), LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed), Password (Password))
+import LastPass.Class (Password (Password))
+import LastPass.Entry (Entry (..), EntryID (EntryID))
+import LastPass.Error (LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
 import Printer.Class (MonadPrinter (printError, printLoadConfigError, printPassword, printUsage))
 import qualified System.Environment as Env
 import System.IO (stderr)
