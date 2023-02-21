@@ -3,8 +3,7 @@ module GetPassword (getPassword, GetPasswordError (..)) where
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError), liftEither)
 import qualified Data.Bifunctor as Bifunctor
-import Data.Text (Text)
-import LastPass (Entry, LastPassError, LastPassResult, MonadLastPass, Search, User)
+import LastPass (Entry, LastPassError, LastPassResult, MonadLastPass, Password, Search, User)
 import qualified LastPass
 import LastPass.Entry (EntryID)
 import qualified LastPass.Entry as Entry
@@ -16,7 +15,7 @@ data GetPasswordError
   | MultiplePasswordsFound [Entry]
   deriving (Show, Eq)
 
-getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> Search -> m Text
+getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> Search -> m Password
 getPassword user search = do
   checkLastPassIsInstalled
   loggedIn <- isLoggedIn
@@ -45,7 +44,7 @@ getMatchingPasswords search = filter (Entry.matches search) <$> listPasswords
 listPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => m [Entry]
 listPasswords = wrapError LastPass.listPasswords
 
-showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => EntryID -> m Text
+showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => EntryID -> m Password
 showPassword = wrapError . LastPass.showPassword
 
 wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (LastPassResult a) -> m a

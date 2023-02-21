@@ -9,6 +9,7 @@ import LastPass
   ( Entry (Entry, id, name, url),
     EntryID (EntryID),
     LastPassError (ListPasswordsFailed, LoginFailed, NotInstalled, ShowPasswordFailed),
+    Password (Password),
     Search (Search),
     User (User),
   )
@@ -126,14 +127,14 @@ spec = do
       do
         let (result, history) = Mock.run $ do
               lift $ Mock.isLoggedInWillReturn False
-              lift $ Mock.showPasswordWillReturn "secret"
+              lift $ Mock.showPasswordWillReturn (Password "secret")
               lift $
                 Mock.listPasswordsWillReturn
                   [ Entry {id = EntryID "entry-id-1", name = "contains search", url = "url1"},
                     Entry {id = EntryID "entry-id-2", name = "other", url = "url2"}
                   ]
               getPassword (Just $ User "user@example.com") (Search "search")
-        result `shouldBe` Right "secret"
+        result `shouldBe` Right (Password "secret")
         history
           `shouldBe` [ "checkIsInstalled",
                        "isLoggedIn",
@@ -145,14 +146,14 @@ spec = do
     it "returns the password matching the name" $
       do
         let (result, history) = Mock.run $ do
-              lift $ Mock.showPasswordWillReturn "secret"
+              lift $ Mock.showPasswordWillReturn (Password "secret")
               lift $
                 Mock.listPasswordsWillReturn
                   [ Entry {id = EntryID "entry-id-1", name = "contains search", url = "url1"},
                     Entry {id = EntryID "entry-id-2", name = "other", url = "url2"}
                   ]
               getPassword Nothing (Search "search")
-        result `shouldBe` Right "secret"
+        result `shouldBe` Right (Password "secret")
         history
           `shouldBe` [ "checkIsInstalled",
                        "isLoggedIn",
@@ -162,14 +163,14 @@ spec = do
 
     it "returns the password matching the url" $ do
       let (result, history) = Mock.run $ do
-            lift $ Mock.showPasswordWillReturn "secret"
+            lift $ Mock.showPasswordWillReturn (Password "secret")
             lift $
               Mock.listPasswordsWillReturn
                 [ Entry {id = EntryID "entry-id-1", name = "does-not-match", url = "url1"},
                   Entry {id = EntryID "entry-id-2", name = "matches", url = "http://example.com"}
                 ]
             getPassword Nothing (Search "example")
-      result `shouldBe` Right "secret"
+      result `shouldBe` Right (Password "secret")
       history
         `shouldBe` [ "checkIsInstalled",
                      "isLoggedIn",

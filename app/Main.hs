@@ -13,6 +13,7 @@ import LastPass
   ( Entry (Entry),
     EntryID (EntryID),
     LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed),
+    Password (Password),
     Search (Search),
     User,
   )
@@ -39,13 +40,13 @@ parseArgs _ = Nothing
 runApp :: Maybe User -> Search -> IO ()
 runApp user = runGetPassword user >=> either printError printPassword
 
-runGetPassword :: Maybe User -> Search -> IO (Either GetPasswordError Text)
+runGetPassword :: Maybe User -> Search -> IO (Either GetPasswordError Password)
 runGetPassword user = runExceptT . LastPass.runLastPassT . GetPassword.getPassword user
 
 ---
 
-printPassword :: Text -> IO ()
-printPassword = TextIO.putStrLn
+printPassword :: Password -> IO ()
+printPassword (Password password) = TextIO.putStrLn password
 
 printLoadConfigError :: LoadConfigError -> IO ()
 printLoadConfigError (LoadConfigError err) = putErrorLn ("Config Error: " <> err)

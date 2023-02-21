@@ -6,7 +6,7 @@ import qualified Data.Bifunctor as Bifunctor
 import qualified Data.Either as Either
 import Data.Text (Text)
 import qualified Data.Text as Text
-import LastPass.Class (LastPassResult, User (User))
+import LastPass.Class (LastPassResult, Password (Password), User (User))
 import LastPass.Entry (Entry, EntryID (EntryID))
 import qualified LastPass.EntryListParser as EntryListParser
 import qualified LastPass.Error as Error
@@ -38,9 +38,10 @@ listPasswords = do
   output <- lpass ["ls", "--sync=now", "--format=%ai \"%an\" %al"] Error.ListPasswordsFailed
   return (output >>= parseEntryList)
 
-showPassword :: MonadIO m => EntryID -> m (LastPassResult Text)
-showPassword (EntryID entryId) =
-  lpass ["show", "--password", Text.unpack entryId] (Error.ShowPasswordFailed "fixme")
+showPassword :: MonadIO m => EntryID -> m (LastPassResult Password)
+showPassword (EntryID entryId) = do
+  result <- lpass ["show", "--password", Text.unpack entryId] (Error.ShowPasswordFailed "fixme")
+  return (Password <$> result)
 
 parseEntryList :: Text -> LastPassResult [Entry]
 parseEntryList = Bifunctor.first Error.ListPasswordsParseFailed . EntryListParser.parse

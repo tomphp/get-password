@@ -17,7 +17,7 @@ import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.Text (Text)
-import LastPass (Entry (Entry), EntryID (EntryID), LastPassError, LastPassResult, MonadLastPass (..), User (User))
+import LastPass (Entry (Entry), EntryID (EntryID), LastPassError, LastPassResult, MonadLastPass (..), Password (Password), User (User))
 
 type Command = Text
 
@@ -26,7 +26,7 @@ data Results = Results
     isLoggedInResult :: Bool,
     loginResult :: LastPassResult (),
     listPasswordsResult :: LastPassResult [Entry],
-    showPasswordResult :: LastPassResult Text
+    showPasswordResult :: LastPassResult Password
   }
 
 type MockLastPass = MockLastPassT Identity
@@ -60,7 +60,7 @@ defaultResults =
       isLoggedInResult = True,
       loginResult = Right (),
       listPasswordsResult = Right [Entry (EntryID "default-id") "default-name" "default-url"],
-      showPasswordResult = Right ""
+      showPasswordResult = Right (Password "")
     }
 
 mockResult :: Monad m => Text -> (Results -> a) -> MockLastPassT m a
@@ -83,7 +83,7 @@ isLoggedInWillReturn :: Monad m => Bool -> MockLastPassT m ()
 isLoggedInWillReturn value =
   modify $ \state -> state {isLoggedInResult = value}
 
-showPasswordWillReturn :: Monad m => Text -> MockLastPassT m ()
+showPasswordWillReturn :: Monad m => Password -> MockLastPassT m ()
 showPasswordWillReturn value =
   modify $ \state -> state {showPasswordResult = Right value}
 
