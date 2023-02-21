@@ -17,17 +17,13 @@ import Printer.SimplePrinter (runSimplePrinterT)
 import qualified System.Environment as Env
 
 main :: IO ()
-main = do
-  runSimplePrinterT $ runMacLoaderT main'
+main = runSimplePrinterT $ runMacLoaderT $ LastPass.runCliLastPassT main'
 
-main' :: (MonadConfigLoader m, MonadPrinter m, MonadIO m) => m ()
-main' = do
-  config <- loadConfig
-  case config of
-    Left err -> printLoadConfigError err
-    Right Config {user} -> do
-      args <- liftIO getArgs
-      maybe printUsage (LastPass.runCliLastPassT . getPasswordAndPrint user) args
+main' :: (MonadLastPass m, MonadConfigLoader m, MonadPrinter m, MonadIO m) => m ()
+main' = loadConfig >>= either printLoadConfigError runGetPassword
+
+runGetPassword :: (MonadLastPass m, MonadPrinter m, MonadIO m) => Config -> m ()
+runGetPassword Config {user} = liftIO getArgs >>= maybe printUsage (getPasswordAndPrint user)
 
 getArgs :: MonadIO m => m (Maybe Search)
 getArgs = parseArgs <$> liftIO Env.getArgs
@@ -37,7 +33,7 @@ parseArgs [search] = Just $ Search $ Text.pack search
 parseArgs _ = Nothing
 
 getPasswordAndPrint :: (MonadLastPass m, MonadPrinter m, MonadIO m) => Maybe User -> Search -> m ()
-getPasswordAndPrint user = runGetPassword user >=> either printError printPassword
+getPasswordAndPrint user = getPassword user >=> either printError printPassword
 
-runGetPassword :: (MonadIO m, MonadLastPass m) => Maybe User -> Search -> m (Either GetPasswordError Password)
-runGetPassword user = runExceptT . GetPassword.getPassword user
+getPassword :: (MonadIO m, MonadLastPass m) => Maybe User -> Search -> m (Either GetPasswordError Password)
+getPassword user = runExceptT . GetPassword.getPassword user
