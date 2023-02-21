@@ -6,4 +6,4 @@ data LastPassError
   | ListPasswordsFailed
   | ListPasswordsParseFailed String
   | ShowPasswordFailed String
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)

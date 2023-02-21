@@ -4,17 +4,17 @@ import Data.Text (Text, isInfixOf)
 import qualified Data.Text as Text
 
 newtype EntryID = EntryID Text
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 data Entry = Entry
   { id :: !EntryID,
     name :: !Text,
     url :: !Text
   }
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 newtype Search = Search Text
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 matches :: Search -> Entry -> Bool
 matches search entry

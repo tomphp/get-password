@@ -9,7 +9,8 @@ import LastPass.Class (MonadLastPass (..))
 import qualified LastPass.Cli as Cli
 
 newtype LastPassT m a = LastPassT {runLastPassT :: m a}
-  deriving (Functor, Applicative, Monad, MonadIO)
+  deriving stock (Functor)
+  deriving newtype (Applicative, Monad, MonadIO)
 
 instance MonadTrans LastPassT where
   lift = LastPassT

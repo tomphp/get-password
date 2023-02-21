@@ -7,7 +7,7 @@ import LastPass (User)
 newtype Config = Config
   { user :: Maybe User
   }
-  deriving (Show, Eq, Generic)
+  deriving stock (Show, Eq, Generic)
 
 instance FromJSON Config where
   parseJSON = withObject "Config" $ \obj ->

@@ -23,7 +23,8 @@ import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
 newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
-  deriving (Functor, Applicative, Monad, MonadIO)
+  deriving stock (Functor)
+  deriving newtype (Applicative, Monad, MonadIO)
 
 instance MonadTrans MacLoaderT where
   lift = MacLoaderT
@@ -56,7 +57,7 @@ defaultIfDoesNotExist _ (Left (ConfigFileParseError err)) = Left (LoadConfigErro
 data ReadConfigError
   = ConfigFileDoesNotExist
   | ConfigFileParseError !Text
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 readConfig :: MonadIO m => FilePath -> m (Either ReadConfigError Config)
 readConfig path = do

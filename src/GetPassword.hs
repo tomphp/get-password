@@ -13,7 +13,7 @@ data GetPasswordError
   | NotLoggedIn
   | PasswordNotFound
   | MultiplePasswordsFound [Entry]
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> Search -> m Password
 getPassword user search = do

@@ -11,12 +11,12 @@ import LastPass.Error (LastPassError)
 type LastPassResult = Either LastPassError
 
 newtype User = User Text
-  deriving (Show, Eq, Generic)
+  deriving stock (Show, Eq, Generic)
 
 instance FromJSON User
 
 newtype Password = Password Text
-  deriving (Show, Eq)
+  deriving stock (Show, Eq)
 
 class Monad m => MonadLastPass m where
   checkIsInstalled :: m (LastPassResult ())

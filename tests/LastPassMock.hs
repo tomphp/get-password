@@ -34,9 +34,9 @@ type MockLastPass = MockLastPassT Identity
 newtype MockLastPassT m a = MockLastPass
   { runMockLastPassT' :: RWST () [Command] Results m a
   }
-  deriving
-    ( Functor,
-      Applicative,
+  deriving stock (Functor)
+  deriving newtype
+    ( Applicative,
       Monad,
       MonadWriter [Command],
       MonadReader (),

@@ -13,7 +13,8 @@ import qualified System.Environment as Env
 import System.IO (stderr)
 
 newtype SimplePrinterT m a = SimplePrinterT {runSimplePrinterT :: m a}
-  deriving (MonadIO, Functor, Applicative, Monad)
+  deriving stock (Functor)
+  deriving newtype (Applicative, Monad, MonadIO)
 
 instance MonadTrans SimplePrinterT where
   lift = SimplePrinterT
