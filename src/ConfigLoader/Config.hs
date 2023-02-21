@@ -1,4 +1,4 @@
-module Config.Config (Config (..), defaultConfig) where
+module ConfigLoader.Config (Config (..), defaultConfig) where
 
 import Data.Yaml (FromJSON (parseJSON), withObject, (.!=), (.:?))
 import GHC.Generics (Generic)

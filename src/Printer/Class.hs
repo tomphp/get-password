@@ -1,6 +1,6 @@
 module Printer.Class (MonadPrinter (..)) where
 
-import Config.Loader (LoadConfigError)
+import ConfigLoader.Class (LoadConfigError)
 import GetPassword (GetPasswordError)
 import LastPass (Password)
 

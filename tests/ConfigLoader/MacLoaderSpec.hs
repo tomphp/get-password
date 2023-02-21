@@ -1,7 +1,7 @@
-module Config.MacLoaderSpec (spec) where
+module ConfigLoader.MacLoaderSpec (spec) where
 
-import Config.Config (Config (Config, user))
-import Config.MacLoader (LoadConfigError (LoadConfigError), ReadConfigError (ConfigFileDoesNotExist, ConfigFileParseError), defaultIfDoesNotExist, getConfigPath, readConfig)
+import ConfigLoader.Config (Config (Config, user))
+import ConfigLoader.MacLoader (LoadConfigError (LoadConfigError), ReadConfigError (ConfigFileDoesNotExist, ConfigFileParseError), defaultIfDoesNotExist, getConfigPath, readConfig)
 import Control.Exception (bracket_, catch)
 import LastPass (User (User))
 import System.Directory (removeFile)

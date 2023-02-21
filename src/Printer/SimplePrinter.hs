@@ -1,6 +1,6 @@
 module Printer.SimplePrinter (SimplePrinterT, runSimplePrinterT) where
 
-import Config.MacLoader (LoadConfigError (LoadConfigError))
+import ConfigLoader.MacLoader (LoadConfigError (LoadConfigError))
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans (lift))
 import Data.Text (Text)

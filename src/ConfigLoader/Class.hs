@@ -1,6 +1,6 @@
-module Config.Loader where
+module ConfigLoader.Class where
 
-import Config.Config (Config)
+import ConfigLoader.Config (Config)
 import Data.Text (Text)
 
 newtype LoadConfigError = LoadConfigError Text

@@ -1,4 +1,4 @@
-module Config.MacLoader
+module ConfigLoader.MacLoader
   ( MacLoaderT (runMacLoaderT),
     ReadConfigError (..),
     LoadConfigError (..),
@@ -9,8 +9,8 @@ module Config.MacLoader
   )
 where
 
-import Config.Config (Config (..), defaultConfig)
-import Config.Loader (ConfigLoader (loadConfig), LoadConfigError (LoadConfigError))
+import ConfigLoader.Class (ConfigLoader (loadConfig), LoadConfigError (LoadConfigError))
+import ConfigLoader.Config (Config (..), defaultConfig)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans, lift)
 import qualified Data.Bifunctor as Bifunctor

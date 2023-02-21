@@ -1,8 +1,8 @@
 module Main (main) where
 
-import Config.Config (Config (Config, user))
-import Config.Loader (ConfigLoader (loadConfig))
-import Config.MacLoader (MacLoaderT (runMacLoaderT))
+import ConfigLoader.Class (ConfigLoader (loadConfig))
+import ConfigLoader.Config (Config (Config, user))
+import ConfigLoader.MacLoader (MacLoaderT (runMacLoaderT))
 import Control.Monad ((>=>))
 import Control.Monad.Except (runExceptT)
 import Control.Monad.IO.Class (MonadIO (liftIO))
