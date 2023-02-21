@@ -9,7 +9,7 @@ module ConfigLoader.MacLoader
   )
 where
 
-import ConfigLoader.Class (ConfigLoader (loadConfig), LoadConfigError (LoadConfigError))
+import ConfigLoader.Class (LoadConfigError (LoadConfigError), MonadConfigLoader (loadConfig))
 import ConfigLoader.Config (Config (..), defaultConfig)
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans (MonadTrans, lift)
@@ -29,7 +29,7 @@ newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
 instance MonadTrans MacLoaderT where
   lift = MacLoaderT
 
-instance MonadIO m => ConfigLoader (MacLoaderT m) where
+instance MonadIO m => MonadConfigLoader (MacLoaderT m) where
   loadConfig = liftIO loadConfig'
 
 loadConfig' :: MonadIO m => m (Either LoadConfigError Config)
