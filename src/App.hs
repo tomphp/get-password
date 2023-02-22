@@ -17,19 +17,20 @@ import Printer.Class (MonadPrinter (printAppError, printPassword))
 import System.Exit (exitFailure)
 
 app :: (MonadArgs m, MonadIO m, MonadPrinter m, MonadConfigLoader m, MonadLastPass m) => m ()
-app = do
-  result <- runExceptT $ do
-    search <- getSearch
-    config <- loadConfig
-    password <- getPassword config search
-    printPassword password
+app = runExceptT lookupPassword >>= printResult
 
-  case result of
-    Right _ -> return ()
-    Left err -> printAppError err >> liftIO exitFailure
+lookupPassword :: (MonadArgs m, MonadError AppError m, MonadConfigLoader m, MonadLastPass m) => m Password
+lookupPassword = do
+  search <- getSearch
+  config <- loadConfig
+  getPassword config search
+
+printResult :: (MonadPrinter m, MonadIO m) => Either AppError Password -> m ()
+printResult (Right password) = printPassword password
+printResult (Left err) = printAppError err >> liftIO exitFailure
 
 getSearch :: (MonadArgs m, MonadError AppError m) => m Search
-getSearch = do
+getSearch =
   Args.getSearch >>= wrapError (\GetArgsError {progName} -> AppGetArgsError progName)
 
 loadConfig :: (MonadError AppError m, MonadConfigLoader m) => m Config
