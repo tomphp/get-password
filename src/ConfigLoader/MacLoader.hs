@@ -8,6 +8,7 @@ module ConfigLoader.MacLoader
   )
 where
 
+import Args.Class (MonadArgs)
 import ConfigLoader.Class (LoadConfigError (LoadConfigError), MonadConfigLoader (loadConfig))
 import ConfigLoader.Config (Config (..), defaultConfig)
 import Console.Class (MonadConsole)
@@ -24,7 +25,7 @@ import System.FilePath ((</>))
 
 newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
   deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO, MonadPrinter, MonadConsole)
+  deriving newtype (Applicative, Monad, MonadIO, MonadArgs, MonadPrinter, MonadConsole)
 
 instance MonadTrans MacLoaderT where
   lift = MacLoaderT

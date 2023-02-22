@@ -2,6 +2,7 @@
 
 module LastPass.CliLastPass (CliLastPassT (..)) where
 
+import Args.Class (MonadArgs)
 import ConfigLoader.Class (MonadConfigLoader)
 import Console.Class (MonadConsole)
 import Control.Monad.Error.Class (MonadError (catchError, throwError))
@@ -13,7 +14,7 @@ import Printer.Class (MonadPrinter)
 
 newtype CliLastPassT m a = CliLastPassT {runCliLastPassT :: m a}
   deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO, MonadPrinter, MonadConfigLoader, MonadConsole)
+  deriving newtype (Applicative, Monad, MonadIO, MonadArgs, MonadPrinter, MonadConfigLoader, MonadConsole)
 
 instance MonadTrans CliLastPassT where
   lift = CliLastPassT

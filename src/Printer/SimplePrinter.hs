@@ -1,6 +1,7 @@
 module Printer.SimplePrinter (SimplePrinterT, runSimplePrinterT) where
 
 import App.Error (AppError (AppGetArgsError, AppGetPasswordError, AppLoadConfigError))
+import Args.Class (MonadArgs)
 import ConfigLoader.Class (LoadConfigError (LoadConfigError), MonadConfigLoader)
 import Console.Class (MonadConsole)
 import qualified Console.Class as Console
@@ -15,7 +16,7 @@ import Printer.Class (MonadPrinter (printAppError, printPassword))
 
 newtype SimplePrinterT m a = SimplePrinterT {runSimplePrinterT :: m a}
   deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO, MonadConsole, MonadConfigLoader)
+  deriving newtype (Applicative, Monad, MonadIO, MonadArgs, MonadConsole, MonadConfigLoader)
 
 instance MonadTrans SimplePrinterT where
   lift = SimplePrinterT
