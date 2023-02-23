@@ -10,7 +10,7 @@ import RIO
 
 main :: IO ()
 main = do
-  runApp app
+  runRIO env (RIO app)
 
 env :: Env
 env =
@@ -20,6 +20,3 @@ env =
       lastPass = cliLastPass,
       printer = simplePrinter
     }
-
-runApp :: ReaderT Env m a -> m a
-runApp = flip runReaderT env
