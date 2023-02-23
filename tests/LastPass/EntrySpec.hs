@@ -1,6 +1,7 @@
 module LastPass.EntrySpec (spec) where
 
 import LastPass.Entry (Entry (Entry, id, name, url), EntryID (EntryID), Search (Search), matches)
+import RIO
 import Test.Hspec
 
 spec :: Spec

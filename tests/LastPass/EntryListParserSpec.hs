@@ -2,6 +2,7 @@ module LastPass.EntryListParserSpec (spec) where
 
 import LastPass.Entry (Entry (Entry, id, name, url), EntryID (EntryID))
 import LastPass.EntryListParser (parse)
+import RIO
 import Test.Hspec
 
 spec :: Spec

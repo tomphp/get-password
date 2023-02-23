@@ -3,10 +3,10 @@ module Main (main) where
 import App (app)
 import Args.CliArgs (cliArgs)
 import ConfigLoader.MacLoader (macConfigLoader)
-import Control.Monad.Reader (ReaderT, runReaderT)
 import Env (Env (..))
 import LastPass.CliLastPass (cliLastPass)
 import Printer.SimplePrinter (simplePrinter)
+import RIO
 
 main :: IO ()
 main = do

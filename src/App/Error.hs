@@ -1,8 +1,8 @@
 module App.Error where
 
 import ConfigLoader.Class (LoadConfigError)
-import Data.Text (Text)
 import GetPassword (GetPasswordError)
+import RIO
 
 data AppError
   = AppGetArgsError Text

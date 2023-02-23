@@ -8,13 +8,12 @@ import qualified ConfigLoader.Class as ConfigLoader
 import ConfigLoader.Config (Config (Config, user))
 import Control.Monad.Error.Class (MonadError, liftEither)
 import Control.Monad.Except (runExceptT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Bifunctor as Bifunctor
 import qualified GetPassword
 import LastPass.Class (MonadLastPass, Password)
 import LastPass.Entry (Search)
 import Printer.Class (MonadPrinter (printAppError, printPassword))
-import System.Exit (exitFailure)
+import RIO
 
 app :: (MonadArgs m, MonadIO m, MonadPrinter m, MonadConfigLoader m, MonadLastPass m) => m ()
 app = runExceptT lookupPassword >>= printResult

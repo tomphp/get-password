@@ -1,11 +1,8 @@
 module Args.Class (Args (..), HasArgs (..), MonadArgs (..), GetArgsError (..)) where
 
 import Control.Monad.Except (ExceptT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (ReaderT, ask)
-import Control.Monad.Trans (lift)
-import Data.Text (Text)
 import LastPass.Entry (Search)
+import RIO
 
 newtype GetArgsError = GetArgsError {progName :: Text}
 

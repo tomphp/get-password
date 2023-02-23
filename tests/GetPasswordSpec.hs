@@ -1,6 +1,5 @@
 module GetPasswordSpec (spec) where
 
-import Control.Monad.RWS (lift)
 import GetPassword
   ( GetPasswordError (LastPassErrored, MultiplePasswordsFound, NotLoggedIn, PasswordNotFound),
     getPassword,
@@ -9,6 +8,7 @@ import LastPass.Class (Password (Password), User (User))
 import LastPass.Entry (Entry (Entry, id, name, url), EntryID (EntryID), Search (Search))
 import LastPass.Error (LastPassError (ListPasswordsFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
 import qualified LastPassMock as Mock
+import RIO
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 spec :: Spec

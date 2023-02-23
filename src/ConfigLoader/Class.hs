@@ -2,10 +2,7 @@ module ConfigLoader.Class where
 
 import ConfigLoader.Config (Config)
 import Control.Monad.Except (ExceptT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (ReaderT, ask)
-import Control.Monad.Trans (lift)
-import Data.Text (Text)
+import RIO
 
 newtype LoadConfigError = LoadConfigError Text
   deriving stock (Show, Eq)

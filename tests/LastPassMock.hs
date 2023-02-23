@@ -11,15 +11,13 @@ module LastPassMock
 where
 
 import Control.Monad.Except (ExceptT, runExceptT)
-import Control.Monad.Identity (Identity (runIdentity))
-import Control.Monad.RWS (MonadRWS, MonadState, MonadTrans, RWST (runRWST))
-import Control.Monad.Reader.Class (MonadReader)
+import Control.Monad.RWS (MonadRWS, MonadState, RWST (runRWST))
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
-import Data.Text (Text)
 import LastPass.Class (LastPassResult, MonadLastPass (checkIsInstalled, isLoggedIn, listPasswords, login, showPassword), Password (Password), User (User))
 import LastPass.Entry (Entry (Entry), EntryID (EntryID))
 import LastPass.Error (LastPassError)
+import RIO
 
 type Command = Text
 

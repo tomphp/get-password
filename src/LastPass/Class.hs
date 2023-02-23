@@ -1,14 +1,10 @@
 module LastPass.Class (LastPassResult, MonadLastPass (..), User (User), Password (Password), LastPass (..), HasLastPass (..)) where
 
 import Control.Monad.Except (ExceptT)
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Reader (MonadIO, ReaderT, ask)
-import Control.Monad.Trans (MonadTrans (lift))
-import Data.Text (Text)
 import Data.Yaml (FromJSON)
-import GHC.Generics (Generic)
 import LastPass.Entry (Entry, EntryID)
 import LastPass.Error (LastPassError)
+import RIO
 
 type LastPassResult = Either LastPassError
 

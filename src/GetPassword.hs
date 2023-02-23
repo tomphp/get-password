@@ -1,6 +1,5 @@
 module GetPassword (getPassword, GetPasswordError (..)) where
 
-import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError), liftEither)
 import qualified Data.Bifunctor as Bifunctor
 import LastPass.Class (LastPassResult, MonadLastPass, Password, User)
@@ -8,6 +7,7 @@ import qualified LastPass.Class as LastPass
 import LastPass.Entry (Entry, EntryID, Search)
 import qualified LastPass.Entry as Entry
 import LastPass.Error (LastPassError)
+import RIO
 
 data GetPasswordError
   = LastPassErrored LastPassError

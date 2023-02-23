@@ -1,16 +1,11 @@
 module LastPass.Cli (checkIsInstalled, isLoggedIn, login, listPasswords, showPassword) where
 
-import Control.Monad (void)
-import Control.Monad.IO.Class (MonadIO (liftIO))
-import qualified Data.Bifunctor as Bifunctor
-import qualified Data.Either as Either
-import Data.Text (Text)
-import qualified Data.Text as Text
 import LastPass.Class (LastPassResult, Password (Password), User (User))
 import LastPass.Entry (Entry, EntryID (EntryID))
 import qualified LastPass.EntryListParser as EntryListParser
 import qualified LastPass.Error as Error
-import System.Exit (ExitCode (ExitSuccess))
+import RIO
+import qualified RIO.Text as Text
 import System.Process (system)
 import System.Process.Text (readProcessWithExitCode)
 
@@ -24,7 +19,7 @@ checkIsLoggedIn =
 
 isLoggedIn :: MonadIO m => m Bool
 isLoggedIn =
-  Either.isRight <$> checkIsLoggedIn
+  isRight <$> checkIsLoggedIn
 
 login :: MonadIO m => User -> m (LastPassResult ())
 login (User user) = do
@@ -44,7 +39,7 @@ showPassword (EntryID entryId) = do
   return (Password <$> result)
 
 parseEntryList :: Text -> LastPassResult [Entry]
-parseEntryList = Bifunctor.first Error.ListPasswordsParseFailed . EntryListParser.parse
+parseEntryList = first Error.ListPasswordsParseFailed . EntryListParser.parse
 
 lpass :: MonadIO m => [String] -> e -> m (Either e Text)
 lpass = runOrError "lpass"

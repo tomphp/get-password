@@ -1,10 +1,9 @@
 module Args.CliArgs where
 
 import Args.Class (Args (Args, getSearch_), GetArgsError (GetArgsError))
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.Text (Text)
-import qualified Data.Text as Text
 import LastPass.Entry (Search (Search))
+import RIO
+import qualified RIO.Text as Text
 import qualified System.Environment as Env
 
 cliArgs :: Args

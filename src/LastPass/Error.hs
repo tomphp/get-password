@@ -1,5 +1,7 @@
 module LastPass.Error (LastPassError (..)) where
 
+import RIO
+
 data LastPassError
   = NotInstalled
   | LoginFailed

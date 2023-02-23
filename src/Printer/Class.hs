@@ -2,10 +2,8 @@ module Printer.Class (MonadPrinter (..), Printer (..), HasPrinter (..)) where
 
 import App.Error (AppError)
 import Control.Monad.Except (ExceptT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (ReaderT, ask)
-import Control.Monad.Trans (lift)
 import LastPass.Class (Password)
+import RIO
 
 class Monad m => MonadPrinter m where
   printPassword :: Password -> m ()

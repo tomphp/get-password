@@ -10,12 +10,10 @@ where
 
 import ConfigLoader.Class (ConfigLoader (ConfigLoader, loadConfig_), LoadConfigError (LoadConfigError))
 import ConfigLoader.Config (Config (..), defaultConfig)
-import Control.Monad.IO.Class (MonadIO (liftIO))
-import qualified Data.Bifunctor as Bifunctor
-import Data.Text (Text)
-import qualified Data.Text as Text
 import Data.Yaml (ParseException)
 import qualified Data.Yaml as Yaml
+import RIO
+import qualified RIO.Text as Text
 import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
@@ -50,7 +48,7 @@ readConfig :: MonadIO m => FilePath -> m (Either ReadConfigError Config)
 readConfig path = do
   configExists <- liftIO $ Dir.doesFileExist path
   if configExists
-    then Bifunctor.first (ConfigFileParseError . Text.pack . Yaml.prettyPrintParseException) <$> readAndParseFile path
+    then first (ConfigFileParseError . Text.pack . Yaml.prettyPrintParseException) <$> readAndParseFile path
     else return (Left ConfigFileDoesNotExist)
 
 readAndParseFile :: MonadIO m => FilePath -> m (Either ParseException Config)

@@ -1,7 +1,8 @@
 module LastPass.Entry (Entry (..), EntryID (EntryID), Search (Search), matches) where
 
-import Data.Text (Text, isInfixOf)
-import qualified Data.Text as Text
+import RIO
+import RIO.Text (isInfixOf)
+import qualified RIO.Text as Text
 
 newtype EntryID = EntryID Text
   deriving stock (Show, Eq)
