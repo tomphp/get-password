@@ -1,59 +1,55 @@
-module Printer.SimplePrinter (SimplePrinterT, runSimplePrinterT) where
+{-# LANGUAGE UndecidableInstances #-}
+
+module Printer.SimplePrinter (simplePrinter) where
 
 import App.Error (AppError (AppGetArgsError, AppGetPasswordError, AppLoadConfigError))
-import Args.Class (MonadArgs)
-import ConfigLoader.Class (LoadConfigError (LoadConfigError), MonadConfigLoader)
-import Console.Class (MonadConsole)
-import qualified Console.Class as Console
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Trans (MonadTrans (lift))
+import ConfigLoader.Class (LoadConfigError (LoadConfigError))
+import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Text (Text)
+import qualified Data.Text.IO as TextIO
 import GetPassword (GetPasswordError (LastPassErrored, MultiplePasswordsFound, NotLoggedIn, PasswordNotFound))
 import LastPass.Class (Password (Password))
 import LastPass.Entry (Entry (..), EntryID (EntryID))
 import LastPass.Error (LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
-import Printer.Class (MonadPrinter (printAppError, printPassword))
+import Printer.Class (Printer (Printer, printAppError_, printPassword_))
+import System.IO (stderr)
 
-newtype SimplePrinterT m a = SimplePrinterT {runSimplePrinterT :: m a}
-  deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO, MonadArgs, MonadConsole, MonadConfigLoader)
+simplePrinter :: Printer
+simplePrinter =
+  Printer
+    { printPassword_ = printPassword,
+      printAppError_ = printAppError
+    }
 
-instance MonadTrans SimplePrinterT where
-  lift = SimplePrinterT
+printPassword :: (MonadIO m) => Password -> m ()
+printPassword (Password password) = liftIO $ TextIO.putStrLn password
 
-instance (Monad m, MonadConsole m) => MonadPrinter (SimplePrinterT m) where
-  printPassword = printPassword'
-  printAppError = lift . printAppError'
+printAppError :: MonadIO m => AppError -> m ()
+printAppError (AppGetArgsError progName) = printUsage progName
+printAppError (AppLoadConfigError err) = printLoadConfigError err
+printAppError (AppGetPasswordError err) = printGetPasswordError err
 
-printPassword' :: MonadConsole m => Password -> m ()
-printPassword' (Password password) = Console.printLine password
+printLoadConfigError :: MonadIO m => LoadConfigError -> m ()
+printLoadConfigError (LoadConfigError err) = liftIO $ TextIO.hPutStrLn stderr ("Config Error: " <> err)
 
-printAppError' :: MonadConsole m => AppError -> m ()
-printAppError' (AppGetArgsError progName) = printUsage progName
-printAppError' (AppLoadConfigError err) = printLoadConfigError err
-printAppError' (AppGetPasswordError err) = printGetPasswordError err
-
-printLoadConfigError :: MonadConsole m => LoadConfigError -> m ()
-printLoadConfigError (LoadConfigError err) = Console.printErrorLine ("Config Error: " <> err)
-
-printGetPasswordError :: (Monad m, MonadConsole m) => GetPasswordError -> m ()
-printGetPasswordError PasswordNotFound = Console.printErrorLine "Error: No matching entries found"
-printGetPasswordError NotLoggedIn = Console.printErrorLine "Error: Not logged in. Please login with `lpass login`"
+printGetPasswordError :: MonadIO m => GetPasswordError -> m ()
+printGetPasswordError PasswordNotFound = liftIO $ TextIO.hPutStrLn stderr "Error: No matching entries found"
+printGetPasswordError NotLoggedIn = liftIO $ TextIO.hPutStrLn stderr "Error: Not logged in. Please login with `lpass login`"
 printGetPasswordError (MultiplePasswordsFound entries) = do
-  Console.printErrorLine "Error: Multiple entries found:"
-  Console.printErrorLine "Matching entries:"
+  liftIO $ TextIO.hPutStrLn stderr "Error: Multiple entries found:"
+  liftIO $ TextIO.hPutStrLn stderr "Matching entries:"
   mapM_ printEntry entries
 printGetPasswordError (LastPassErrored err) = printLastPassError err
 
-printUsage :: MonadConsole m => Text -> m ()
-printUsage progName = Console.printErrorLine ("Usage: " <> progName <> " <search>")
+printUsage :: MonadIO m => Text -> m ()
+printUsage progName = liftIO $ TextIO.hPutStrLn stderr ("Usage: " <> progName <> " <search>")
 
-printLastPassError :: MonadConsole m => LastPassError -> m ()
-printLastPassError NotInstalled = Console.printErrorLine "Error: LastPass CLI not installed. Please install with `brew install lastpass-cli`"
-printLastPassError LoginFailed = Console.printErrorLine "Error: Failed to login in"
-printLastPassError ListPasswordsFailed = Console.printErrorLine "Error: Failed to list passwords"
-printLastPassError (ListPasswordsParseFailed _) = Console.printErrorLine "Error: Failed to parse list passwords output"
-printLastPassError (ShowPasswordFailed _) = Console.printErrorLine "Error: Failed to show password"
+printLastPassError :: MonadIO m => LastPassError -> m ()
+printLastPassError NotInstalled = liftIO $ TextIO.hPutStrLn stderr "Error: LastPass CLI not installed. Please install with `brew install lastpass-cli`"
+printLastPassError LoginFailed = liftIO $ TextIO.hPutStrLn stderr "Error: Failed to login in"
+printLastPassError ListPasswordsFailed = liftIO $ TextIO.hPutStrLn stderr "Error: Failed to list passwords"
+printLastPassError (ListPasswordsParseFailed _) = liftIO $ TextIO.hPutStrLn stderr "Error: Failed to parse list passwords output"
+printLastPassError (ShowPasswordFailed _) = liftIO $ TextIO.hPutStrLn stderr "Error: Failed to show password"
 
-printEntry :: MonadConsole m => Entry -> m ()
-printEntry Entry {id = EntryID entryID, name} = Console.printErrorLine (" - " <> name <> " [" <> entryID <> "]")
+printEntry :: MonadIO m => Entry -> m ()
+printEntry Entry {id = EntryID entryID, name} = liftIO $ TextIO.hPutStrLn stderr (" - " <> name <> " [" <> entryID <> "]")

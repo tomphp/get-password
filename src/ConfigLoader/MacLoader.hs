@@ -1,40 +1,32 @@
 module ConfigLoader.MacLoader
-  ( MacLoaderT (runMacLoaderT),
-    ReadConfigError (..),
+  ( ReadConfigError (..),
     defaultIfDoesNotExist,
     getConfigPath,
     loadConfig,
     readConfig,
+    macConfigLoader,
   )
 where
 
-import Args.Class (MonadArgs)
-import ConfigLoader.Class (LoadConfigError (LoadConfigError), MonadConfigLoader (loadConfig))
+import ConfigLoader.Class (ConfigLoader (ConfigLoader, loadConfig_), LoadConfigError (LoadConfigError))
 import ConfigLoader.Config (Config (..), defaultConfig)
-import Console.Class (MonadConsole)
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Control.Monad.Trans (MonadTrans, lift)
 import qualified Data.Bifunctor as Bifunctor
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Yaml (ParseException)
 import qualified Data.Yaml as Yaml
-import Printer.Class (MonadPrinter)
 import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
-newtype MacLoaderT m a = MacLoaderT {runMacLoaderT :: m a}
-  deriving stock (Functor)
-  deriving newtype (Applicative, Monad, MonadIO, MonadArgs, MonadPrinter, MonadConsole)
+macConfigLoader :: ConfigLoader
+macConfigLoader =
+  ConfigLoader
+    { loadConfig_ = loadConfig
+    }
 
-instance MonadTrans MacLoaderT where
-  lift = MacLoaderT
-
-instance MonadIO m => MonadConfigLoader (MacLoaderT m) where
-  loadConfig = liftIO loadConfig'
-
-loadConfig' :: MonadIO m => m (Either LoadConfigError Config)
-loadConfig' = do
+loadConfig :: MonadIO m => m (Either LoadConfigError Config)
+loadConfig = do
   path <- getConfigPath
   config <- readConfig path
   return $ defaultIfDoesNotExist defaultConfig config
