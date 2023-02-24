@@ -13,8 +13,8 @@ import ConfigLoader.Config (Config (..), defaultConfig)
 import Data.Yaml (ParseException)
 import qualified Data.Yaml as Yaml
 import RIO
+import qualified RIO.Directory as Dir
 import qualified RIO.Text as Text
-import qualified System.Directory as Dir
 import System.FilePath ((</>))
 
 macConfigLoader :: ConfigLoader
