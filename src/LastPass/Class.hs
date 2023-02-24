@@ -35,21 +35,11 @@ data LastPass = LastPass
 makeClassy ''LastPass
 
 instance (HasLastPass env, MonadIO m) => MonadLastPass (ReaderT env m) where
-  checkIsInstalled_ = do
-    env <- ask
-    liftIO (env ^. checkIsInstalled)
-  isLoggedIn_ = do
-    env <- ask
-    liftIO (env ^. isLoggedIn)
-  login_ user = do
-    env <- ask
-    liftIO $ (env ^. login) user
-  listPasswords_ = do
-    env <- ask
-    liftIO (env ^. listPasswords)
-  showPassword_ entryID = do
-    env <- ask
-    liftIO $ (env ^. showPassword) entryID
+  checkIsInstalled_ = ask >>= view checkIsInstalled
+  isLoggedIn_ = ask >>= view isLoggedIn
+  login_ user = ask >>= view login <*> pure user
+  listPasswords_ = ask >>= view listPasswords
+  showPassword_ entryID = ask >>= view showPassword <*> pure entryID
 
 instance MonadLastPass m => MonadLastPass (ExceptT e m) where
   checkIsInstalled_ = lift checkIsInstalled_

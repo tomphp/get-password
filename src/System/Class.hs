@@ -26,13 +26,13 @@ data System = System
 makeClassy ''System
 
 instance (MonadIO m, HasSystem env) => MonadSystem (ReaderT env m) where
-  getArgs_ = ask >>= liftIO <$> view getArgs
-  getProgName_ = ask >>= liftIO <$> view getProgName
-  getHomeDirectory_ = ask >>= liftIO <$> view getHomeDirectory
-  printLine_ line = ask >>= liftIO <$> (view printLine <*> pure line)
-  printError_ line = ask >>= liftIO <$> (view printError <*> pure line)
-  execInteractive_ program = ask >>= liftIO <$> (view execInteractive <*> pure program)
-  exec_ program args = ask >>= liftIO <$> (view exec <*> pure program <*> pure args)
+  getArgs_ = ask >>= view getArgs
+  getProgName_ = ask >>= view getProgName
+  getHomeDirectory_ = ask >>= view getHomeDirectory
+  printLine_ line = ask >>= view printLine <*> pure line
+  printError_ line = ask >>= view printError <*> pure line
+  execInteractive_ program = ask >>= view execInteractive <*> pure program
+  exec_ program args = ask >>= view exec <*> pure program <*> pure args
 
 instance (MonadSystem m) => MonadSystem (ExceptT env m) where
   getArgs_ = lift getArgs_

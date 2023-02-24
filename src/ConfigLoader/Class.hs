@@ -18,9 +18,7 @@ newtype ConfigLoader = ConfigLoader
 makeClassy ''ConfigLoader
 
 instance (HasConfigLoader env, MonadIO m) => MonadConfigLoader (ReaderT env m) where
-  loadConfig_ = do
-    env <- ask
-    liftIO $ _loadConfig (env ^. configLoader)
+  loadConfig_ = ask >>= view loadConfig
 
 instance (MonadConfigLoader m) => MonadConfigLoader (ExceptT e m) where
   loadConfig_ = lift loadConfig_
