@@ -20,10 +20,10 @@ makeClassy ''Printer
 instance (HasPrinter env, MonadIO m) => MonadPrinter (ReaderT env m) where
   printPassword_ password = do
     env <- ask
-    liftIO $ _printPassword (env ^. printer) password
+    liftIO $ (env ^. printPassword) password
   printAppError_ appError = do
     env <- ask
-    liftIO $ _printAppError (env ^. printer) appError
+    liftIO $ (env ^. printAppError) appError
 
 instance MonadPrinter m => MonadPrinter (ExceptT e m) where
   printPassword_ = lift . printPassword_

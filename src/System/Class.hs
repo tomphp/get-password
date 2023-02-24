@@ -28,25 +28,25 @@ makeClassy ''System
 instance (MonadIO m, HasSystem env) => MonadSystem (ReaderT env m) where
   getArgs_ = do
     env <- ask
-    liftIO $ _getArgs (env ^. system)
+    liftIO (env ^. getArgs)
   getProgName_ = do
     env <- ask
-    liftIO $ _getProgName (env ^. system)
+    liftIO (env ^. getProgName)
   getHomeDirectory_ = do
     env <- ask
-    liftIO $ _getHomeDirectory (env ^. system)
+    liftIO (env ^. getHomeDirectory)
   printLine_ line = do
     env <- ask
-    liftIO $ _printLine (env ^. system) line
+    liftIO $ (env ^. printLine) line
   printError_ line = do
     env <- ask
-    liftIO $ _printError (env ^. system) line
+    liftIO $ (env ^. printError) line
   execInteractive_ program = do
     env <- ask
-    liftIO $ _execInteractive (env ^. system) program
+    liftIO $ (env ^. execInteractive) program
   exec_ program args = do
     env <- ask
-    liftIO $ _exec (env ^. system) program args
+    liftIO $ (env ^. exec) program args
 
 instance (MonadSystem m) => MonadSystem (ExceptT env m) where
   getArgs_ = lift getArgs_

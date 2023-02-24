@@ -21,7 +21,7 @@ makeClassy ''Args
 instance (HasArgs env, HasSystem env, MonadIO m) => MonadArgs (ReaderT env m) where
   getSearch_ = do
     env <- ask
-    _getSearch (env ^. args)
+    env ^. getSearch
 
 instance (MonadArgs m) => MonadArgs (ExceptT e m) where
   getSearch_ = lift getSearch_
