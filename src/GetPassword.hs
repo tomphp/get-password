@@ -1,7 +1,6 @@
 module GetPassword (getPassword, GetPasswordError (..)) where
 
 import Control.Monad.Except (MonadError (throwError), liftEither)
-import qualified Data.Bifunctor as Bifunctor
 import LastPass.Class (LastPassResult, MonadLastPass, Password, User)
 import qualified LastPass.Class as LastPass
 import LastPass.Entry (Entry, EntryID, Search)
@@ -55,4 +54,4 @@ wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (LastPassResu
 wrapError = eitherToError LastPassErrored
 
 eitherToError :: (MonadLastPass m, MonadError e' m) => (e -> e') -> m (Either e a) -> m a
-eitherToError f = (>>= liftEither . Bifunctor.first f)
+eitherToError f = (>>= liftEither . first f)

@@ -8,7 +8,6 @@ import qualified ConfigLoader.Class as ConfigLoader
 import ConfigLoader.Config (Config (Config, user))
 import Control.Monad.Error.Class (MonadError, liftEither)
 import Control.Monad.Except (runExceptT)
-import qualified Data.Bifunctor as Bifunctor
 import qualified GetPassword
 import LastPass.Class (MonadLastPass, Password)
 import LastPass.Entry (Search)
@@ -40,4 +39,4 @@ getPassword Config {user} search =
   runExceptT (GetPassword.getPassword user search) >>= wrapError AppGetPasswordError
 
 wrapError :: MonadError e' m => (e -> e') -> Either e a -> m a
-wrapError f = liftEither . Bifunctor.first f
+wrapError f = liftEither . first f
