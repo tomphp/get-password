@@ -15,7 +15,7 @@ import qualified Data.Yaml as Yaml
 import RIO
 import qualified RIO.Directory as Dir
 import qualified RIO.Text as Text
-import System.FilePath ((</>))
+import RIO.FilePath ((</>))
 
 macConfigLoader :: ConfigLoader
 macConfigLoader =

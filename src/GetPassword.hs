@@ -27,7 +27,7 @@ getPassword user search = do
 checkLastPassIsInstalled :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
 checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled
 
-isLoggedIn :: (MonadLastPass m, MonadError GetPasswordError m) => m Bool
+isLoggedIn :: (MonadLastPass m) => m Bool
 isLoggedIn = LastPass.isLoggedIn
 
 attemptLogin :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> m ()
