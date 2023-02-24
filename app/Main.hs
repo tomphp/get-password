@@ -16,9 +16,9 @@ main = do
 env :: Env
 env =
   Env
-    { args = cliArgs,
-      configLoader = macConfigLoader,
-      lastPass = cliLastPass,
-      printer = simplePrinter,
-      system = cliSystem
+    { _args = cliArgs,
+      _configLoader = macConfigLoader,
+      _lastPass = cliLastPass,
+      _printer = simplePrinter,
+      _system = cliSystem
     }

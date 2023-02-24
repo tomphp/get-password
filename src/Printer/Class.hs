@@ -3,31 +3,28 @@ module Printer.Class (MonadPrinter (..), Printer (..), HasPrinter (..)) where
 import App.Error (AppError)
 import Control.Monad.Except (ExceptT)
 import LastPass.Class (Password)
+import Lens.Micro.TH (makeClassy)
 import RIO
 
 class Monad m => MonadPrinter m where
-  printPassword :: Password -> m ()
-  printAppError :: AppError -> m ()
+  printPassword_ :: Password -> m ()
+  printAppError_ :: AppError -> m ()
 
 data Printer = Printer
-  { printPassword_ :: !(forall m. MonadIO m => Password -> m ()),
-    printAppError_ :: !(forall m. MonadIO m => AppError -> m ())
+  { _printPassword :: !(forall m. MonadIO m => Password -> m ()),
+    _printAppError :: !(forall m. MonadIO m => AppError -> m ())
   }
 
-class HasPrinter env where
-  getPrinter :: env -> Printer
-
-instance HasPrinter Printer where
-  getPrinter = id
+makeClassy ''Printer
 
 instance (HasPrinter env, MonadIO m) => MonadPrinter (ReaderT env m) where
-  printPassword password = do
+  printPassword_ password = do
     env <- ask
-    liftIO $ printPassword_ (getPrinter env) password
-  printAppError appError = do
+    liftIO $ _printPassword (env ^. printer) password
+  printAppError_ appError = do
     env <- ask
-    liftIO $ printAppError_ (getPrinter env) appError
+    liftIO $ _printAppError (env ^. printer) appError
 
 instance MonadPrinter m => MonadPrinter (ExceptT e m) where
-  printPassword = lift . printPassword
-  printAppError = lift . printAppError
+  printPassword_ = lift . printPassword_
+  printAppError_ = lift . printAppError_

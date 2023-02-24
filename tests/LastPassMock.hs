@@ -14,7 +14,7 @@ import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.RWS (MonadRWS, MonadState, RWST (runRWST))
 import Control.Monad.State (gets, modify)
 import Control.Monad.Writer (MonadWriter, tell)
-import LastPass.Class (LastPassResult, MonadLastPass (checkIsInstalled, isLoggedIn, listPasswords, login, showPassword), Password (Password), User (User))
+import LastPass.Class (LastPassResult, MonadLastPass (..), Password (Password), User (User))
 import LastPass.Entry (Entry (Entry), EntryID (EntryID))
 import LastPass.Error (LastPassError)
 import RIO
@@ -69,11 +69,11 @@ mockResult command getter = do
   gets getter
 
 instance Monad m => MonadLastPass (MockLastPassT m) where
-  checkIsInstalled = mockResult "checkIsInstalled" checkIsInstalledResult
-  isLoggedIn = mockResult "isLoggedIn" isLoggedInResult
-  login (User user) = mockResult ("login \"" <> user <> "\"") loginResult
-  listPasswords = mockResult "listPasswords" listPasswordsResult
-  showPassword (EntryID entryID) = mockResult ("showPassword \"" <> entryID <> "\"") showPasswordResult
+  checkIsInstalled_ = mockResult "checkIsInstalled" checkIsInstalledResult
+  isLoggedIn_ = mockResult "isLoggedIn" isLoggedInResult
+  login_ (User user) = mockResult ("login \"" <> user <> "\"") loginResult
+  listPasswords_ = mockResult "listPasswords" listPasswordsResult
+  showPassword_ (EntryID entryID) = mockResult ("showPassword \"" <> entryID <> "\"") showPasswordResult
 
 listPasswordsWillReturn :: Monad m => [Entry] -> MockLastPassT m ()
 listPasswordsWillReturn value =

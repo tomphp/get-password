@@ -11,7 +11,7 @@ import Control.Monad.Except (runExceptT)
 import qualified GetPassword
 import LastPass.Class (MonadLastPass, Password)
 import LastPass.Entry (Search)
-import Printer.Class (MonadPrinter (printAppError, printPassword))
+import Printer.Class (MonadPrinter (..))
 import RIO
 
 app :: (MonadArgs m, MonadIO m, MonadPrinter m, MonadConfigLoader m, MonadLastPass m) => m ()
@@ -24,15 +24,15 @@ lookupPassword = do
   getPassword config search
 
 printResult :: (MonadPrinter m, MonadIO m) => Either AppError Password -> m ()
-printResult (Right password) = printPassword password
-printResult (Left err) = printAppError err >> liftIO exitFailure
+printResult (Right password) = printPassword_ password
+printResult (Left err) = printAppError_ err >> liftIO exitFailure
 
 getSearch :: (MonadArgs m, MonadError AppError m) => m Search
 getSearch =
-  Args.getSearch >>= wrapError (\GetArgsError {progName} -> AppGetArgsError progName)
+  Args.getSearch_ >>= wrapError (\GetArgsError {progName} -> AppGetArgsError progName)
 
 loadConfig :: (MonadError AppError m, MonadConfigLoader m) => m Config
-loadConfig = ConfigLoader.loadConfig >>= wrapError AppLoadConfigError
+loadConfig = ConfigLoader.loadConfig_ >>= wrapError AppLoadConfigError
 
 getPassword :: (MonadError AppError m, MonadLastPass m) => Config -> Search -> m Password
 getPassword Config {user} search =

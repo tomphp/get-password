@@ -6,7 +6,7 @@ import GetPassword (GetPasswordError (LastPassErrored, MultiplePasswordsFound, N
 import LastPass.Class (Password (Password))
 import LastPass.Entry (Entry (..), EntryID (EntryID))
 import LastPass.Error (LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
-import Printer.Class (Printer (Printer, printAppError_, printPassword_))
+import Printer.Class (Printer (..))
 import RIO
 import qualified RIO.Text as Text
 import System.IO (hPutStrLn, putStrLn)
@@ -14,8 +14,8 @@ import System.IO (hPutStrLn, putStrLn)
 simplePrinter :: Printer
 simplePrinter =
   Printer
-    { printPassword_ = printPassword,
-      printAppError_ = printAppError
+    { _printPassword = printPassword,
+      _printAppError = printAppError
     }
 
 printPassword :: (MonadIO m) => Password -> m ()

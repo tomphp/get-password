@@ -8,7 +8,7 @@ module ConfigLoader.MacLoader
   )
 where
 
-import ConfigLoader.Class (ConfigLoader (ConfigLoader, loadConfig_), LoadConfigError (LoadConfigError))
+import ConfigLoader.Class (ConfigLoader (ConfigLoader, _loadConfig), LoadConfigError (LoadConfigError))
 import ConfigLoader.Config (Config (..), defaultConfig)
 import Data.Yaml (ParseException)
 import qualified Data.Yaml as Yaml
@@ -20,7 +20,7 @@ import qualified RIO.Text as Text
 macConfigLoader :: ConfigLoader
 macConfigLoader =
   ConfigLoader
-    { loadConfig_ = loadConfig
+    { _loadConfig = loadConfig
     }
 
 loadConfig :: MonadIO m => m (Either LoadConfigError Config)

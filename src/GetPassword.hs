@@ -25,22 +25,22 @@ getPassword user search = do
   showPassword entryId
 
 checkLastPassIsInstalled :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
-checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled
+checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled_
 
 isLoggedIn :: (MonadLastPass m) => m Bool
-isLoggedIn = LastPass.isLoggedIn
+isLoggedIn = LastPass.isLoggedIn_
 
 attemptLogin :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> m ()
 attemptLogin = maybe (throwError NotLoggedIn) login
 
 login :: (MonadLastPass m, MonadError GetPasswordError m) => User -> m ()
-login = wrapError . LastPass.login
+login = wrapError . LastPass.login_
 
 getMatchingPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => Search -> m [Entry]
 getMatchingPasswords search = filter (Entry.matches search) <$> listPasswords
 
 listPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => m [Entry]
-listPasswords = wrapError LastPass.listPasswords
+listPasswords = wrapError LastPass.listPasswords_
 
 getEntryId :: MonadError GetPasswordError m => [Entry] -> m EntryID
 getEntryId [] = throwError PasswordNotFound
@@ -48,7 +48,7 @@ getEntryId [entry] = return (Entry.id entry)
 getEntryId entries = throwError (MultiplePasswordsFound entries)
 
 showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => EntryID -> m Password
-showPassword = wrapError . LastPass.showPassword
+showPassword = wrapError . LastPass.showPassword_
 
 wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (LastPassResult a) -> m a
 wrapError = eitherToError LastPassErrored

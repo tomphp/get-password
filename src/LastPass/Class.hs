@@ -4,6 +4,7 @@ import Control.Monad.Except (ExceptT)
 import Data.Yaml (FromJSON)
 import LastPass.Entry (Entry, EntryID)
 import LastPass.Error (LastPassError)
+import Lens.Micro.TH (makeClassy)
 import RIO
 
 type LastPassResult = Either LastPassError
@@ -17,46 +18,42 @@ newtype Password = Password Text
   deriving stock (Show, Eq)
 
 class Monad m => MonadLastPass m where
-  checkIsInstalled :: m (LastPassResult ())
-  isLoggedIn :: m Bool
-  login :: User -> m (LastPassResult ())
-  listPasswords :: m (LastPassResult [Entry])
-  showPassword :: EntryID -> m (LastPassResult Password)
+  checkIsInstalled_ :: m (LastPassResult ())
+  isLoggedIn_ :: m Bool
+  login_ :: User -> m (LastPassResult ())
+  listPasswords_ :: m (LastPassResult [Entry])
+  showPassword_ :: EntryID -> m (LastPassResult Password)
 
 data LastPass = LastPass
-  { checkIsInstalled_ :: !(forall m. MonadIO m => m (LastPassResult ())),
-    isLoggedIn_ :: !(forall m. MonadIO m => m Bool),
-    login_ :: !(forall m. MonadIO m => User -> m (LastPassResult ())),
-    listPasswords_ :: !(forall m. MonadIO m => m (LastPassResult [Entry])),
-    showPassword_ :: !(forall m. MonadIO m => EntryID -> m (LastPassResult Password))
+  { _checkIsInstalled :: !(forall m. MonadIO m => m (LastPassResult ())),
+    _isLoggedIn :: !(forall m. MonadIO m => m Bool),
+    _login :: !(forall m. MonadIO m => User -> m (LastPassResult ())),
+    _listPasswords :: !(forall m. MonadIO m => m (LastPassResult [Entry])),
+    _showPassword :: !(forall m. MonadIO m => EntryID -> m (LastPassResult Password))
   }
 
-class HasLastPass env where
-  getLastPass :: env -> LastPass
-
-instance HasLastPass LastPass where
-  getLastPass = id
+makeClassy ''LastPass
 
 instance (HasLastPass env, MonadIO m) => MonadLastPass (ReaderT env m) where
-  checkIsInstalled = do
+  checkIsInstalled_ = do
     env <- ask
-    liftIO $ checkIsInstalled_ (getLastPass env)
-  isLoggedIn = do
+    liftIO $ _checkIsInstalled (env ^. lastPass)
+  isLoggedIn_ = do
     env <- ask
-    liftIO $ isLoggedIn_ (getLastPass env)
-  login user = do
+    liftIO $ _isLoggedIn (env ^. lastPass)
+  login_ user = do
     env <- ask
-    liftIO $ login_ (getLastPass env) user
-  listPasswords = do
+    liftIO $ _login (env ^. lastPass) user
+  listPasswords_ = do
     env <- ask
-    liftIO $ listPasswords_ (getLastPass env)
-  showPassword entryID = do
+    liftIO $ _listPasswords (env ^. lastPass)
+  showPassword_ entryID = do
     env <- ask
-    liftIO $ showPassword_ (getLastPass env) entryID
+    liftIO $ _showPassword (env ^. lastPass) entryID
 
 instance MonadLastPass m => MonadLastPass (ExceptT e m) where
-  checkIsInstalled = lift checkIsInstalled
-  isLoggedIn = lift isLoggedIn
-  login = lift . login
-  listPasswords = lift listPasswords
-  showPassword = lift . showPassword
+  checkIsInstalled_ = lift checkIsInstalled_
+  isLoggedIn_ = lift isLoggedIn_
+  login_ = lift . login_
+  listPasswords_ = lift listPasswords_
+  showPassword_ = lift . showPassword_

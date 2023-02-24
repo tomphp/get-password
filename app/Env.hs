@@ -1,30 +1,33 @@
 module Env (Env (..)) where
 
-import Args.Class (Args, HasArgs (getArgs))
-import ConfigLoader.Class (ConfigLoader, HasConfigLoader (getConfigLoader))
-import LastPass.Class (HasLastPass (getLastPass), LastPass)
-import Printer.Class (HasPrinter (getPrinter), Printer)
-import System.Class (HasSystem (getSystem), System)
+import Args.Class as Args
+import ConfigLoader.Class as ConfigLoader
+import LastPass.Class as LastPass
+import Lens.Micro.TH (makeLenses)
+import Printer.Class as Printer
+import System.Class as System
 
 data Env = Env
-  { args :: !Args,
-    configLoader :: !ConfigLoader,
-    lastPass :: !LastPass,
-    printer :: !Printer,
-    system :: !System
+  { _args :: !Args,
+    _configLoader :: !ConfigLoader,
+    _lastPass :: !LastPass,
+    _printer :: !Printer,
+    _system :: !System
   }
 
+makeLenses ''Env
+
 instance HasArgs Env where
-  getArgs = args
+  args = Env.args
 
 instance HasConfigLoader Env where
-  getConfigLoader = configLoader
+  configLoader = Env.configLoader
 
 instance HasLastPass Env where
-  getLastPass = lastPass
+  lastPass = Env.lastPass
 
 instance HasPrinter Env where
-  getPrinter = printer
+  printer = Env.printer
 
 instance HasSystem Env where
-  getSystem = system
+  system = Env.system

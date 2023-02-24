@@ -1,20 +1,20 @@
 module Args.CliArgs where
 
-import Args.Class (Args (Args, getSearch_), GetArgsError (GetArgsError))
+import Args.Class (Args (Args, _getSearch), GetArgsError (GetArgsError))
 import LastPass.Entry (Search (Search))
 import RIO
 import qualified RIO.Text as Text
-import System.Class (MonadSystem, getArgs)
+import System.Class (MonadSystem, getArgs_)
 import qualified System.Environment as Env
 
 cliArgs :: Args
 cliArgs =
   Args
-    { getSearch_ = getSearch
+    { _getSearch = getSearch
     }
 
 getSearch :: (MonadSystem m) => m (Either GetArgsError Search)
-getSearch = getArgs >>= extractSeach
+getSearch = getArgs_ >>= extractSeach
 
 extractSeach :: MonadIO m => [Text] -> m (Either GetArgsError Search)
 extractSeach = liftM2 maybeToEither (GetArgsError <$> getProgName) . (pure . parseArgs)

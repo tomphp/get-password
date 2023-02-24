@@ -12,13 +12,13 @@ import System.Process.Text (readProcessWithExitCode)
 cliSystem :: System
 cliSystem =
   System
-    { getArgs_ = getArgs,
-      getProgName_ = getProgName,
-      getHomeDirectory_ = Dir.getHomeDirectory,
-      printLine_ = printLine,
-      printError_ = printError,
-      execInteractive_ = execInteractive,
-      exec_ = exec
+    { _getArgs = getArgs,
+      _getProgName = getProgName,
+      _getHomeDirectory = Dir.getHomeDirectory,
+      _printLine = printLine,
+      _printError = printError,
+      _execInteractive = execInteractive,
+      _exec = exec
     }
 
 getArgs :: MonadIO m => m [Text]
