@@ -1,14 +1,9 @@
-module Printer.Class (MonadPrinter (..), Printer (..), HasPrinter (..)) where
+module Printer.Class (Printer (..), HasPrinter (..), printPassword_, printAppError_) where
 
 import App.Error (AppError)
-import Control.Monad.Except (ExceptT)
 import LastPass.Class (Password)
 import Lens.Micro.TH (makeClassy)
 import RIO
-
-class Monad m => MonadPrinter m where
-  printPassword_ :: Password -> m ()
-  printAppError_ :: AppError -> m ()
 
 data Printer = Printer
   { _printPassword :: !(forall m. MonadIO m => Password -> m ()),
@@ -17,10 +12,8 @@ data Printer = Printer
 
 makeClassy ''Printer
 
-instance (HasPrinter env, MonadIO m) => MonadPrinter (ReaderT env m) where
-  printPassword_ password = ask >>= view printPassword <*> pure password
-  printAppError_ appError = ask >>= view printAppError <*> pure appError
+printPassword_ :: (MonadReader env m, HasPrinter env, MonadIO m) => Password -> m ()
+printPassword_ password = ask >>= view printPassword <*> pure password
 
-instance MonadPrinter m => MonadPrinter (ExceptT e m) where
-  printPassword_ = lift . printPassword_
-  printAppError_ = lift . printAppError_
+printAppError_ :: (MonadReader env m, HasPrinter env, MonadIO m) => AppError -> m ()
+printAppError_ appError = ask >>= view printAppError <*> pure appError

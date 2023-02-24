@@ -1,17 +1,7 @@
-module System.Class (MonadSystem (..), System (..), HasSystem (..)) where
+module System.Class (System (..), HasSystem (..), getArgs_, getProgName_, getHomeDirectory_, printLine_, printError_, execInteractive_, exec_) where
 
-import Control.Monad.Except (ExceptT)
 import Lens.Micro.TH (makeClassy)
 import RIO
-
-class MonadIO m => MonadSystem m where
-  getArgs_ :: m [Text]
-  getProgName_ :: m Text
-  getHomeDirectory_ :: m FilePath
-  printLine_ :: Text -> m ()
-  printError_ :: Text -> m ()
-  execInteractive_ :: Text -> m ExitCode
-  exec_ :: FilePath -> [Text] -> m (Either () Text)
 
 data System = System
   { _getArgs :: !(forall m. MonadIO m => m [Text]),
@@ -25,20 +15,23 @@ data System = System
 
 makeClassy ''System
 
-instance (MonadIO m, HasSystem env) => MonadSystem (ReaderT env m) where
-  getArgs_ = ask >>= view getArgs
-  getProgName_ = ask >>= view getProgName
-  getHomeDirectory_ = ask >>= view getHomeDirectory
-  printLine_ line = ask >>= view printLine <*> pure line
-  printError_ line = ask >>= view printError <*> pure line
-  execInteractive_ program = ask >>= view execInteractive <*> pure program
-  exec_ program args = ask >>= view exec <*> pure program <*> pure args
+getArgs_ :: (MonadReader env m, MonadIO m, HasSystem env) => m [Text]
+getArgs_ = ask >>= view getArgs
 
-instance (MonadSystem m) => MonadSystem (ExceptT env m) where
-  getArgs_ = lift getArgs_
-  getProgName_ = lift getProgName_
-  getHomeDirectory_ = lift getHomeDirectory_
-  printLine_ = lift . printLine_
-  printError_ = lift . printError_
-  execInteractive_ = lift . execInteractive_
-  exec_ program = lift . exec_ program
+getProgName_ :: (MonadReader env m, MonadIO m, HasSystem env) => m Text
+getProgName_ = ask >>= view getProgName
+
+getHomeDirectory_ :: (MonadReader env m, MonadIO m, HasSystem env) => m FilePath
+getHomeDirectory_ = ask >>= view getHomeDirectory
+
+printLine_ :: (MonadReader env m, MonadIO m, HasSystem env) => Text -> m ()
+printLine_ line = ask >>= view printLine <*> pure line
+
+printError_ :: (MonadReader env m, MonadIO m, HasSystem env) => Text -> m ()
+printError_ line = ask >>= view printError <*> pure line
+
+execInteractive_ :: (MonadReader env m, MonadIO m, HasSystem env) => Text -> m ExitCode
+execInteractive_ program = ask >>= view execInteractive <*> pure program
+
+exec_ :: (MonadReader env m, MonadIO m, HasSystem env) => FilePath -> [Text] -> m (Either () Text)
+exec_ program args = ask >>= view exec <*> pure program <*> pure args

@@ -1,6 +1,17 @@
-module LastPass.Class (LastPassResult, MonadLastPass (..), User (User), Password (Password), LastPass (..), HasLastPass (..)) where
+module LastPass.Class
+  ( LastPassResult,
+    User (User),
+    Password (Password),
+    LastPass (..),
+    HasLastPass (..),
+    checkIsInstalled_,
+    isLoggedIn_,
+    login_,
+    listPasswords_,
+    showPassword_,
+  )
+where
 
-import Control.Monad.Except (ExceptT)
 import Data.Yaml (FromJSON)
 import LastPass.Entry (Entry, EntryID)
 import LastPass.Error (LastPassError)
@@ -17,13 +28,6 @@ instance FromJSON User
 newtype Password = Password Text
   deriving stock (Show, Eq)
 
-class Monad m => MonadLastPass m where
-  checkIsInstalled_ :: m (LastPassResult ())
-  isLoggedIn_ :: m Bool
-  login_ :: User -> m (LastPassResult ())
-  listPasswords_ :: m (LastPassResult [Entry])
-  showPassword_ :: EntryID -> m (LastPassResult Password)
-
 data LastPass = LastPass
   { _checkIsInstalled :: !(forall m. MonadIO m => m (LastPassResult ())),
     _isLoggedIn :: !(forall m. MonadIO m => m Bool),
@@ -34,16 +38,17 @@ data LastPass = LastPass
 
 makeClassy ''LastPass
 
-instance (HasLastPass env, MonadIO m) => MonadLastPass (ReaderT env m) where
-  checkIsInstalled_ = ask >>= view checkIsInstalled
-  isLoggedIn_ = ask >>= view isLoggedIn
-  login_ user = ask >>= view login <*> pure user
-  listPasswords_ = ask >>= view listPasswords
-  showPassword_ entryID = ask >>= view showPassword <*> pure entryID
+checkIsInstalled_ :: (MonadReader env m, HasLastPass env, MonadIO m) => m (LastPassResult ())
+checkIsInstalled_ = ask >>= view checkIsInstalled
 
-instance MonadLastPass m => MonadLastPass (ExceptT e m) where
-  checkIsInstalled_ = lift checkIsInstalled_
-  isLoggedIn_ = lift isLoggedIn_
-  login_ = lift . login_
-  listPasswords_ = lift listPasswords_
-  showPassword_ = lift . showPassword_
+isLoggedIn_ :: (MonadReader env m, HasLastPass env, MonadIO m) => m Bool
+isLoggedIn_ = ask >>= view isLoggedIn
+
+login_ :: (MonadReader env m, HasLastPass env, MonadIO m) => User -> m (LastPassResult ())
+login_ user = ask >>= view login <*> pure user
+
+listPasswords_ :: (MonadReader env m, HasLastPass env, MonadIO m) => m (LastPassResult [Entry])
+listPasswords_ = ask >>= view listPasswords
+
+showPassword_ :: (MonadReader env m, HasLastPass env, MonadIO m) => EntryID -> m (LastPassResult Password)
+showPassword_ entryID = ask >>= view showPassword <*> pure entryID

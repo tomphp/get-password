@@ -4,7 +4,7 @@ import Args.Class (Args (Args, _getSearch), GetArgsError (GetArgsError))
 import LastPass.Entry (Search (Search))
 import RIO
 import qualified RIO.Text as Text
-import System.Class (MonadSystem, getArgs_)
+import System.Class (HasSystem, getArgs_)
 import qualified System.Environment as Env
 
 cliArgs :: Args
@@ -13,7 +13,7 @@ cliArgs =
     { _getSearch = getSearch
     }
 
-getSearch :: (MonadSystem m) => m (Either GetArgsError Search)
+getSearch :: (MonadIO m, MonadReader env m, HasSystem env) => m (Either GetArgsError Search)
 getSearch = getArgs_ >>= extractSeach
 
 extractSeach :: MonadIO m => [Text] -> m (Either GetArgsError Search)

@@ -1,7 +1,7 @@
 module GetPassword (getPassword, GetPasswordError (..)) where
 
 import Control.Monad.Except (MonadError, liftEither, throwError)
-import LastPass.Class (LastPassResult, MonadLastPass, Password, User)
+import LastPass.Class (HasLastPass, LastPassResult, Password, User)
 import qualified LastPass.Class as LastPass
 import LastPass.Entry (Entry, EntryID, Search)
 import qualified LastPass.Entry as Entry
@@ -15,7 +15,7 @@ data GetPasswordError
   | MultiplePasswordsFound ![Entry]
   deriving stock (Show, Eq)
 
-getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> Search -> m Password
+getPassword :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => Maybe User -> Search -> m Password
 getPassword user search = do
   checkLastPassIsInstalled
   loggedIn <- isLoggedIn
@@ -24,22 +24,22 @@ getPassword user search = do
   entryId <- getEntryId entries
   showPassword entryId
 
-checkLastPassIsInstalled :: (MonadLastPass m, MonadError GetPasswordError m) => m ()
+checkLastPassIsInstalled :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => m ()
 checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled_
 
-isLoggedIn :: (MonadLastPass m) => m Bool
+isLoggedIn :: (MonadIO m, MonadReader env m, HasLastPass env) => m Bool
 isLoggedIn = LastPass.isLoggedIn_
 
-attemptLogin :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> m ()
+attemptLogin :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => Maybe User -> m ()
 attemptLogin = maybe (throwError NotLoggedIn) login
 
-login :: (MonadLastPass m, MonadError GetPasswordError m) => User -> m ()
+login :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => User -> m ()
 login = wrapError . LastPass.login_
 
-getMatchingPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => Search -> m [Entry]
+getMatchingPasswords :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => Search -> m [Entry]
 getMatchingPasswords search = filter (Entry.matches search) <$> listPasswords
 
-listPasswords :: (MonadLastPass m, MonadError GetPasswordError m) => m [Entry]
+listPasswords :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => m [Entry]
 listPasswords = wrapError LastPass.listPasswords_
 
 getEntryId :: MonadError GetPasswordError m => [Entry] -> m EntryID
@@ -47,11 +47,11 @@ getEntryId [] = throwError PasswordNotFound
 getEntryId [entry] = return (Entry.id entry)
 getEntryId entries = throwError (MultiplePasswordsFound entries)
 
-showPassword :: (MonadLastPass m, MonadError GetPasswordError m) => EntryID -> m Password
+showPassword :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => EntryID -> m Password
 showPassword = wrapError . LastPass.showPassword_
 
-wrapError :: (MonadLastPass m, MonadError GetPasswordError m) => m (LastPassResult a) -> m a
+wrapError :: (MonadReader env m, MonadError GetPasswordError m) => m (LastPassResult a) -> m a
 wrapError = eitherToError LastPassErrored
 
-eitherToError :: (MonadLastPass m, MonadError e' m) => (e -> e') -> m (Either e a) -> m a
+eitherToError :: (MonadReader env m, MonadError e' m) => (e -> e') -> m (Either e a) -> m a
 eitherToError f = (>>= liftEither . first f)
