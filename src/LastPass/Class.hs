@@ -24,11 +24,11 @@ class Monad m => MonadLastPass m where
   showPassword :: EntryID -> m (LastPassResult Password)
 
 data LastPass = LastPass
-  { checkIsInstalled_ :: IO (LastPassResult ()),
-    isLoggedIn_ :: IO Bool,
-    login_ :: User -> IO (LastPassResult ()),
-    listPasswords_ :: IO (LastPassResult [Entry]),
-    showPassword_ :: EntryID -> IO (LastPassResult Password)
+  { checkIsInstalled_ :: forall m. MonadIO m => m (LastPassResult ()),
+    isLoggedIn_ :: forall m. MonadIO m => m Bool,
+    login_ :: forall m. MonadIO m => User -> m (LastPassResult ()),
+    listPasswords_ :: forall m. MonadIO m => m (LastPassResult [Entry]),
+    showPassword_ :: forall m. MonadIO m => EntryID -> m (LastPassResult Password)
   }
 
 class HasLastPass env where

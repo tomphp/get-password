@@ -11,7 +11,7 @@ class Monad m => MonadConfigLoader m where
   loadConfig :: m (Either LoadConfigError Config)
 
 newtype ConfigLoader = ConfigLoader
-  { loadConfig_ :: IO (Either LoadConfigError Config)
+  { loadConfig_ :: forall m. MonadIO m => m (Either LoadConfigError Config)
   }
 
 class HasConfigLoader env where

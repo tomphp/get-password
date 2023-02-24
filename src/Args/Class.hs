@@ -10,7 +10,7 @@ class Monad m => MonadArgs m where
   getSearch :: m (Either GetArgsError Search)
 
 newtype Args = Args
-  { getSearch_ :: IO (Either GetArgsError Search)
+  { getSearch_ :: forall m. MonadIO m => m (Either GetArgsError Search)
   }
 
 class HasArgs env where
