@@ -1,6 +1,6 @@
 module GetPassword (getPassword, GetPasswordError (..)) where
 
-import Control.Monad.Except (MonadError, throwError, liftEither)
+import Control.Monad.Except (MonadError, liftEither, throwError)
 import LastPass.Class (LastPassResult, MonadLastPass, Password, User)
 import qualified LastPass.Class as LastPass
 import LastPass.Entry (Entry, EntryID, Search)

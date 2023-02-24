@@ -25,5 +25,5 @@ instance (HasConfigLoader env, MonadIO m) => MonadConfigLoader (ReaderT env m) w
     env <- ask
     liftIO $ loadConfig_ (getConfigLoader env)
 
-instance (Monad m, MonadConfigLoader m) => MonadConfigLoader (ExceptT e m) where
+instance (MonadConfigLoader m) => MonadConfigLoader (ExceptT e m) where
   loadConfig = lift loadConfig

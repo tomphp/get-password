@@ -7,6 +7,7 @@ import Env (Env (..))
 import LastPass.CliLastPass (cliLastPass)
 import Printer.SimplePrinter (simplePrinter)
 import RIO
+import System.Cli (cliSystem)
 
 main :: IO ()
 main = do
@@ -18,5 +19,6 @@ env =
     { args = cliArgs,
       configLoader = macConfigLoader,
       lastPass = cliLastPass,
-      printer = simplePrinter
+      printer = simplePrinter,
+      system = cliSystem
     }
