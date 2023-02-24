@@ -6,6 +6,6 @@ data LastPassError
   = NotInstalled
   | LoginFailed
   | ListPasswordsFailed
-  | ListPasswordsParseFailed String
-  | ShowPasswordFailed String
+  | ListPasswordsParseFailed !String
+  | ShowPasswordFailed !String
   deriving stock (Show, Eq)

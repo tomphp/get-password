@@ -5,6 +5,6 @@ import GetPassword (GetPasswordError)
 import RIO
 
 data AppError
-  = AppGetArgsError Text
-  | AppLoadConfigError LoadConfigError
-  | AppGetPasswordError GetPasswordError
+  = AppGetArgsError !Text
+  | AppLoadConfigError !LoadConfigError
+  | AppGetPasswordError !GetPasswordError

@@ -22,11 +22,11 @@ import RIO
 type Command = Text
 
 data Results = Results
-  { checkIsInstalledResult :: LastPassResult (),
-    isLoggedInResult :: Bool,
-    loginResult :: LastPassResult (),
-    listPasswordsResult :: LastPassResult [Entry],
-    showPasswordResult :: LastPassResult Password
+  { checkIsInstalledResult :: !(LastPassResult ()),
+    isLoggedInResult :: !Bool,
+    loginResult :: !(LastPassResult ()),
+    listPasswordsResult :: !(LastPassResult [Entry]),
+    showPasswordResult :: !(LastPassResult Password)
   }
 
 type MockLastPass = MockLastPassT Identity

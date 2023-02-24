@@ -10,8 +10,8 @@ class Monad m => MonadPrinter m where
   printAppError :: AppError -> m ()
 
 data Printer = Printer
-  { printPassword_ :: forall m. MonadIO m => Password -> m (),
-    printAppError_ :: forall m. MonadIO m => AppError -> m ()
+  { printPassword_ :: !(forall m. MonadIO m => Password -> m ()),
+    printAppError_ :: !(forall m. MonadIO m => AppError -> m ())
   }
 
 class HasPrinter env where

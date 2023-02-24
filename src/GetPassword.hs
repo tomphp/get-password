@@ -9,10 +9,10 @@ import LastPass.Error (LastPassError)
 import RIO
 
 data GetPasswordError
-  = LastPassErrored LastPassError
+  = LastPassErrored !LastPassError
   | NotLoggedIn
   | PasswordNotFound
-  | MultiplePasswordsFound [Entry]
+  | MultiplePasswordsFound ![Entry]
   deriving stock (Show, Eq)
 
 getPassword :: (MonadLastPass m, MonadError GetPasswordError m) => Maybe User -> Search -> m Password
