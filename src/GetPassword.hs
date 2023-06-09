@@ -1,4 +1,4 @@
-module GetPassword (getPassword, GetPasswordError (..)) where
+module GetPassword (getPassword, GetAction (..), GetPasswordResult (..), GetPasswordError (..)) where
 
 import Control.Monad.Except (MonadError, liftEither, throwError)
 import LastPass.Class (HasLastPass, LastPassResult, Password, User)
@@ -8,6 +8,10 @@ import qualified LastPass.Entry as Entry
 import LastPass.Error (LastPassError)
 import RIO
 
+data GetAction = ShowPassword | CopyPassword deriving (Eq, Show)
+
+data GetPasswordResult = CopiedPassword | FetchedPassword Password
+
 data GetPasswordError
   = LastPassErrored !LastPassError
   | NotLoggedIn
@@ -15,14 +19,16 @@ data GetPasswordError
   | MultiplePasswordsFound ![Entry]
   deriving stock (Show, Eq)
 
-getPassword :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => Maybe User -> Search -> m Password
-getPassword user search = do
+getPassword :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => Maybe User -> GetAction -> Search -> m GetPasswordResult
+getPassword user action search = do
   checkLastPassIsInstalled
   loggedIn <- isLoggedIn
   unless loggedIn (attemptLogin user)
   entries <- getMatchingPasswords search
   entryId <- getEntryId entries
-  showPassword entryId
+  if action == ShowPassword
+    then FetchedPassword <$> showPassword entryId
+    else copyPassword entryId >> pure CopiedPassword
 
 checkLastPassIsInstalled :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => m ()
 checkLastPassIsInstalled = wrapError LastPass.checkIsInstalled_
@@ -49,6 +55,9 @@ getEntryId entries = throwError (MultiplePasswordsFound entries)
 
 showPassword :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => EntryID -> m Password
 showPassword = wrapError . LastPass.showPassword_
+
+copyPassword :: (MonadIO m, MonadReader env m, HasLastPass env, MonadError GetPasswordError m) => EntryID -> m ()
+copyPassword = wrapError . LastPass.copyPassword_
 
 wrapError :: (MonadReader env m, MonadError GetPasswordError m) => m (LastPassResult a) -> m a
 wrapError = eitherToError LastPassErrored

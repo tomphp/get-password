@@ -8,4 +8,5 @@ data LastPassError
   | ListPasswordsFailed
   | ListPasswordsParseFailed !String
   | ShowPasswordFailed !String
+  | CopyPasswordFailed !String
   deriving stock (Show, Eq)

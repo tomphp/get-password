@@ -1,4 +1,4 @@
-module LastPass.Cli (checkIsInstalled, isLoggedIn, login, listPasswords, showPassword) where
+module LastPass.Cli (checkIsInstalled, isLoggedIn, login, listPasswords, showPassword, copyPassword) where
 
 import LastPass.Class (LastPassResult, Password (Password), User (User))
 import LastPass.Entry (Entry, EntryID (EntryID))
@@ -37,6 +37,10 @@ showPassword :: MonadIO m => EntryID -> m (LastPassResult Password)
 showPassword (EntryID entryId) = do
   result <- lpass ["show", "--password", Text.unpack entryId] (Error.ShowPasswordFailed "fixme")
   return (Password <$> result)
+
+copyPassword :: MonadIO m => EntryID -> m (LastPassResult ())
+copyPassword (EntryID entryId) = do
+  void <$> lpass ["show", "--password", "--clip", Text.unpack entryId] (Error.CopyPasswordFailed "fixme")
 
 parseEntryList :: Text -> LastPassResult [Entry]
 parseEntryList = first Error.ListPasswordsParseFailed . EntryListParser.parse

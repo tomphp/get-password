@@ -10,5 +10,6 @@ cliLastPass =
       _isLoggedIn = Cli.isLoggedIn,
       _login = Cli.login,
       _listPasswords = Cli.listPasswords,
-      _showPassword = Cli.showPassword
+      _showPassword = Cli.showPassword,
+      _copyPassword = Cli.copyPassword
     }

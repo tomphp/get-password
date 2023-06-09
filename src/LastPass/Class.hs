@@ -9,6 +9,7 @@ module LastPass.Class
     login_,
     listPasswords_,
     showPassword_,
+    copyPassword_,
   )
 where
 
@@ -33,7 +34,8 @@ data LastPass = LastPass
     _isLoggedIn :: !(forall m. MonadIO m => m Bool),
     _login :: !(forall m. MonadIO m => User -> m (LastPassResult ())),
     _listPasswords :: !(forall m. MonadIO m => m (LastPassResult [Entry])),
-    _showPassword :: !(forall m. MonadIO m => EntryID -> m (LastPassResult Password))
+    _showPassword :: !(forall m. MonadIO m => EntryID -> m (LastPassResult Password)),
+    _copyPassword :: !(forall m. MonadIO m => EntryID -> m (LastPassResult ()))
   }
 
 makeClassy ''LastPass
@@ -52,3 +54,6 @@ listPasswords_ = ask >>= view listPasswords
 
 showPassword_ :: (MonadReader env m, HasLastPass env, MonadIO m) => EntryID -> m (LastPassResult Password)
 showPassword_ entryID = ask >>= view showPassword <*> pure entryID
+
+copyPassword_ :: (MonadReader env m, HasLastPass env, MonadIO m) => EntryID -> m (LastPassResult ())
+copyPassword_ entryID = ask >>= view copyPassword <*> pure entryID

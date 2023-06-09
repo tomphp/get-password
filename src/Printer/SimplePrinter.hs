@@ -5,7 +5,7 @@ import ConfigLoader.Class (LoadConfigError (LoadConfigError))
 import GetPassword (GetPasswordError (LastPassErrored, MultiplePasswordsFound, NotLoggedIn, PasswordNotFound))
 import LastPass.Class (Password (Password))
 import LastPass.Entry (Entry (..), EntryID (EntryID))
-import LastPass.Error (LastPassError (ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
+import LastPass.Error (LastPassError (CopyPasswordFailed, ListPasswordsFailed, ListPasswordsParseFailed, LoginFailed, NotInstalled, ShowPasswordFailed))
 import Printer.Class (Printer (..))
 import RIO
 import qualified RIO.Text as Text
@@ -15,11 +15,15 @@ simplePrinter :: Printer
 simplePrinter =
   Printer
     { _printPassword = printPassword,
+      _printCopiedMessage = printCopiedMessage,
       _printAppError = printAppError
     }
 
 printPassword :: (MonadIO m) => Password -> m ()
 printPassword (Password password) = liftIO $ putStrLn (Text.unpack password)
+
+printCopiedMessage :: (MonadIO m) => m ()
+printCopiedMessage = liftIO $ putStrLn "Password copied to clipboard!"
 
 printAppError :: MonadIO m => AppError -> m ()
 printAppError (AppGetArgsError progName) = printUsage progName
@@ -47,6 +51,7 @@ printLastPassError LoginFailed = liftIO $ hPutStrLn stderr "Error: Failed to log
 printLastPassError ListPasswordsFailed = liftIO $ hPutStrLn stderr "Error: Failed to list passwords"
 printLastPassError (ListPasswordsParseFailed _) = liftIO $ hPutStrLn stderr "Error: Failed to parse list passwords output"
 printLastPassError (ShowPasswordFailed _) = liftIO $ hPutStrLn stderr "Error: Failed to show password"
+printLastPassError (CopyPasswordFailed _) = liftIO $ hPutStrLn stderr "Error: Failed to copy password"
 
 printEntry :: MonadIO m => Entry -> m ()
 printEntry Entry {id = EntryID entryID, name} = liftIO $ hPutStrLn stderr (" - " <> Text.unpack name <> " [" <> Text.unpack entryID <> "]")
